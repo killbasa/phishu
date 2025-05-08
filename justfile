@@ -14,17 +14,10 @@ deploy:
 req *args:
 	curl -v http://localhost:3000{{args}}
 
-ci: check test fmt clippy
-	@echo "✅ All checks passed"
-
-check:
+ci:
 	cargo check
-
-test:
 	cargo test
-
-fmt:
 	cargo fmt --check
-
-clippy:
 	cargo clippy -- --deny warnings
+	cargo shear
+	@echo "✅ All checks passed"

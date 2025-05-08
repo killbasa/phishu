@@ -1,13 +1,12 @@
 mod config;
 mod constants;
+mod pages;
 mod utils;
 mod youtube;
 
 use std::{
-    fs,
     net::{Ipv4Addr, SocketAddr},
     str::FromStr,
-    time::Duration,
 };
 
 use axum::{
@@ -18,25 +17,17 @@ use axum::{
 };
 use axum_extra::{TypedHeader, headers::UserAgent};
 use config::CONFIG;
-use once_cell::sync::Lazy;
-use tower::ServiceBuilder;
-use tower_http::{
-    LatencyUnit,
-    timeout::TimeoutLayer,
-    trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer},
-};
-use utils::root_banner;
-use youtube::get_channel_from_api;
+use pages::{PageContext, Pages, Render};
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt().with_max_level(tracing::Level::DEBUG).init();
 
     let host = Ipv4Addr::from_str(&CONFIG.server.host).expect("invalid host");
-    let addr = SocketAddr::from((host, CONFIG.server.port));
-    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
+    let socket = SocketAddr::from((host, CONFIG.server.port));
+    let listener = tokio::net::TcpListener::bind(&socket).await.unwrap();
 
-    tracing::event!(tracing::Level::INFO, "listening on http://{}", &addr);
+    tracing::info!("listening on http://{}", &socket);
 
     axum::serve(
         listener, //
@@ -47,17 +38,8 @@ async fn main() {
 }
 
 fn app() -> Router {
-    let middleware = ServiceBuilder::new()
-        .layer(
-            TraceLayer::new_for_http()
-                .make_span_with(DefaultMakeSpan::new().include_headers(true))
-                .on_response(DefaultOnResponse::new().latency_unit(LatencyUnit::Micros)),
-        )
-        .layer(TimeoutLayer::new(Duration::from_secs(10)));
-
     Router::new() //
         .fallback(fallback)
-        .layer(middleware)
         // Routes
         .route("/", get(get_root))
         .route("/info", get(get_info))
@@ -66,6 +48,12 @@ fn app() -> Router {
         // Redirects
         .route("/git", get(Redirect::permanent(&CONFIG.git_repo)))
         .route("/website", get(Redirect::temporary("https://aegis-l.ink/talent/triggerphish")))
+        .route(
+            "/store",
+            get(Redirect::temporary(
+                "https://merch.kawaentertainment.com/en-ca/collections/trigg3rph-h",
+            )),
+        )
         .route("/youtube", get(Redirect::permanent("https://www.youtube.com/@TRiGGERPHiSH")))
         .route("/twitter", get(Redirect::permanent("https://twitter.com/TRiGGERPH1SH")))
         .route("/discord", get(Redirect::permanent("https://discord.com/invite/4GHZZMm4Sp")))
@@ -74,54 +62,50 @@ fn app() -> Router {
         .route("/reddit", get(Redirect::permanent("https://www.reddit.com/user/TriggerPh1sh/")))
 }
 
+fn render(user_agent: UserAgent, page: Pages) -> impl axum::response::IntoResponse {
+    let mut headers = HeaderMap::new();
+    let ctx = PageContext { host: CONFIG.public_host.clone() };
+
+    let content = if user_agent.to_string().starts_with("curl") {
+        headers.insert("Content-Type", "text/plain".parse().unwrap());
+        page.render_term(ctx)
+    } else {
+        headers.insert("Content-Type", "text/html".parse().unwrap());
+        page.render_html(ctx)
+    };
+
+    (StatusCode::OK, headers, content)
+}
+
 // 404 handler
 async fn fallback(uri: axum::http::Uri) -> impl axum::response::IntoResponse {
     (axum::http::StatusCode::NOT_FOUND, format!("no route {}", uri))
 }
 
 // GET /
-static ROOT_BANNER: Lazy<String> = Lazy::new(|| root_banner(&CONFIG.public_host));
-static ROOT_HTML: Lazy<String> = Lazy::new(|| {
-    let regex =
-        regex::Regex::new(r#"<span (style='color:#\w+')>(https?://[^\s]+)</span>"#).unwrap();
-    let html = fs::read_to_string("assets/index.html").unwrap();
-    let banner = ansi_to_html::convert(&ROOT_BANNER).unwrap();
-
-    let banner_with_links = regex.replace_all(&banner, |caps: &regex::Captures| {
-        let color = caps.get(1).unwrap().as_str();
-        let link = caps.get(2).unwrap().as_str();
-
-        format!(r#"<a href="{1}" target="_blank" {0}>{1}</a>"#, color, link)
-    });
-
-    html.replace("<pre></pre>", &format!("<pre>{}</pre>", banner_with_links))
-});
-
 async fn get_root(
     TypedHeader(user_agent): TypedHeader<UserAgent>,
 ) -> impl axum::response::IntoResponse {
-    let mut headers = HeaderMap::new();
-
-    if user_agent.to_string().starts_with("curl") {
-        headers.insert("Content-Type", "text/plain".parse().unwrap());
-        (StatusCode::OK, headers, ROOT_BANNER.clone())
-    } else {
-        headers.insert("Content-Type", "text/html".parse().unwrap());
-        (StatusCode::OK, headers, ROOT_HTML.clone())
-    }
+    render(user_agent, Pages::Root)
 }
 
 // GET /info
-async fn get_info() -> impl axum::response::IntoResponse {
-    get_channel_from_api()
+async fn get_info(
+    TypedHeader(user_agent): TypedHeader<UserAgent>,
+) -> impl axum::response::IntoResponse {
+    render(user_agent, Pages::Info)
 }
 
 // GET /upcoming
-async fn get_upcoming() -> impl axum::response::IntoResponse {
-    (StatusCode::NOT_IMPLEMENTED, "not implemented")
+async fn get_upcoming(
+    TypedHeader(user_agent): TypedHeader<UserAgent>,
+) -> impl axum::response::IntoResponse {
+    render(user_agent, Pages::Upcoming)
 }
 
 // GET /lastseen
-async fn get_lastseen() -> impl axum::response::IntoResponse {
-    (StatusCode::NOT_IMPLEMENTED, "not implemented")
+async fn get_lastseen(
+    TypedHeader(user_agent): TypedHeader<UserAgent>,
+) -> impl axum::response::IntoResponse {
+    render(user_agent, Pages::LastSeen)
 }
