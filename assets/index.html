@@ -3,7 +3,6 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<script src="https://cdn.jsdelivr.net/npm/ansi_up@4.0.4/ansi_up.js"></script>
 
 		<title>TRiGGERPHiSH</title>
 
@@ -25,38 +24,6 @@
 		</style>
 	</head>
 	<body>
-		<main></main>
-		<script type="text/javascript">
-			/** @param {string} html */
-			function addAnchors(html) {
-				const regex =
-					/<span (style="color:rgb\(\d+,\d+,\d+\)")>(https?:\/\/[^\s]+)<\/span>/gm;
-				return html.replace(
-					regex,
-					'<a href="$2" target="_blank" $1>$2</a>'
-				);
-			}
-
-			async function load() {
-				const ansi = new AnsiUp();
-
-				const response = await fetch("/", {
-					headers: {
-						"User-Agent": "curl/0.0.0",
-					},
-				});
-
-				const data = await response.text();
-				const main = document.querySelector("main");
-				const pre = document.createElement("pre");
-
-				const styledText = ansi.ansi_to_html(data);
-				pre.innerHTML = addAnchors(styledText);
-
-				main?.appendChild(pre);
-			}
-
-			window.onload = load;
-		</script>
+		<pre></pre>
 	</body>
 </html>

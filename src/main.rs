@@ -81,7 +81,21 @@ async fn fallback(uri: axum::http::Uri) -> impl axum::response::IntoResponse {
 
 // GET /
 static ROOT_BANNER: Lazy<String> = Lazy::new(|| root_banner(&CONFIG.public_host));
-static ROOT_HTML: Lazy<String> = Lazy::new(|| fs::read_to_string("assets/index.html").unwrap());
+static ROOT_HTML: Lazy<String> = Lazy::new(|| {
+    let regex =
+        regex::Regex::new(r#"<span (style='color:#\w+')>(https?://[^\s]+)</span>"#).unwrap();
+    let html = fs::read_to_string("assets/index.html").unwrap();
+    let banner = ansi_to_html::convert(&ROOT_BANNER).unwrap();
+
+    let banner_with_links = regex.replace_all(&banner, |caps: &regex::Captures| {
+        let color = caps.get(1).unwrap().as_str();
+        let link = caps.get(2).unwrap().as_str();
+
+        format!(r#"<a href="{1}" target="_blank" {0}>{1}</a>"#, color, link)
+    });
+
+    html.replace("<pre></pre>", &format!("<pre>{}</pre>", banner_with_links))
+});
 
 async fn get_root(
     TypedHeader(user_agent): TypedHeader<UserAgent>,

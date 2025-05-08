@@ -19,10 +19,12 @@ debug    = true
 inherits = "release"
 
 [dependencies]
+ansi-to-html       = "0.2.2"
 axum               = "0.8.4"
 axum-extra         = { version = "0.10.1", features = ["typed-header"] }
 colored            = "3.0.0"
 once_cell          = "1.21.3"
+regex = "1.11.1"
 serde              = "1.0.219"
 tokio              = { version = "1.45.0", features = ["full"] }
 tower              = { version = "0.5.2", features = ["full"] }
