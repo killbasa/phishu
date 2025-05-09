@@ -7,12 +7,11 @@ watch:
 build:
 	cargo build --locked
 
-deploy:
-	cargo build --locked --release
-	PHISHU_DOMAIN=triggerphi.sh ./target/release/phishu
+release:
+	cargo build --locked --release --target x86_64-unknown-linux-musl
 
-req *args:
-	curl -v http://localhost:3000{{args}}
+deploy: release
+	PHISHU_DOMAIN=triggerphi.sh ./target/x86_64-unknown-linux-musl/release/phishu
 
 ci:
 	cargo check

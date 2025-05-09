@@ -87,7 +87,10 @@ impl Render for Page {
 
     fn render_html(&self, ctx: PageContext) -> String {
         let page = self.render_term(ctx);
-        let file = fs::read_to_string("assets/index.html").unwrap();
+
+        let file = fs::read_to_string("assets/index.html")
+            .map_err(|e| format!("error reading HTML file: {}", e))
+            .unwrap();
 
         hydrate_page(&page, &file)
     }

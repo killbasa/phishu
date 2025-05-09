@@ -1,0 +1,9 @@
+services:
+  phishu:
+    image: killbasa/phishu:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:3000:3000
