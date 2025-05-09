@@ -5,6 +5,7 @@ use once_cell::sync::Lazy;
 pub struct ServerConfig {
     pub host: String,
     pub port: u16,
+    pub log_level: tracing::Level,
 }
 
 pub struct Config {
@@ -15,10 +16,16 @@ pub struct Config {
 
 impl Config {
     fn get() -> Config {
+        let level = match env::var("DEBUG_LOG").as_deref() {
+            Ok("1") | Ok("true") => tracing::Level::DEBUG,
+            _ => tracing::Level::INFO,
+        };
+
         Config {
             server: ServerConfig {
                 host: env::var("HOST").unwrap_or("127.0.0.1".to_string()), //
                 port: env::var("PORT").unwrap_or("3000".to_string()).parse().unwrap_or(3000),
+                log_level: level,
             },
             git_repo: "https://github.com/killbasa/phishu".to_string(),
             public_host: env::var("PHISHU_DOMAIN").unwrap_or("localhost:3000".to_string()),

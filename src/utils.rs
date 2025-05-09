@@ -14,7 +14,8 @@ pub static ANCHOR_REGEX: Lazy<regex::Regex> = Lazy::new(|| {
     regex::Regex::new(r#"<span (style='color:#\w+')>(https?://[^\s]+)</span>"#).unwrap()
 });
 
-pub fn hydrate_page(page: &str, html: &str) -> String {
+const HTML_STR: &str = include_str!("assets/index.html");
+pub fn hydrate_page(page: &str) -> String {
     let page_with_color = ansi_to_html::convert(page).unwrap();
 
     let page_with_links = ANCHOR_REGEX.replace_all(&page_with_color, |caps: &regex::Captures| {
@@ -24,5 +25,5 @@ pub fn hydrate_page(page: &str, html: &str) -> String {
         format!(r#"<a href="{1}" target="_blank" {0}>{1}</a>"#, color, link)
     });
 
-    html.replace("{{content}}", &page_with_links.replace("\t", ""))
+    HTML_STR.replace("{{content}}", &page_with_links.replace("\t", ""))
 }

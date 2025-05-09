@@ -11,7 +11,7 @@ use std::{
 
 use axum::{
     Router,
-    http::{HeaderMap, StatusCode},
+    http::{HeaderMap, StatusCode, header::CONTENT_TYPE},
     response::Redirect,
     routing::get,
 };
@@ -21,7 +21,7 @@ use pages::{PageContext, Pages, Render};
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt().with_max_level(tracing::Level::DEBUG).init();
+    tracing_subscriber::fmt().with_max_level(CONFIG.server.log_level).init();
 
     let host = Ipv4Addr::from_str(&CONFIG.server.host).expect("invalid host");
     let socket = SocketAddr::from((host, CONFIG.server.port));
@@ -60,6 +60,8 @@ fn app() -> Router {
         .route("/twitch", get(Redirect::permanent("https://www.twitch.tv/triggerph1sh")))
         .route("/tiktok", get(Redirect::permanent("https://www.tiktok.com/@triggerphish_al")))
         .route("/reddit", get(Redirect::permanent("https://www.reddit.com/user/TriggerPh1sh/")))
+        // Assets
+        .route("/favicon.ico", get(get_favicon))
 }
 
 fn render(user_agent: UserAgent, page: Pages) -> impl axum::response::IntoResponse {
@@ -67,14 +69,21 @@ fn render(user_agent: UserAgent, page: Pages) -> impl axum::response::IntoRespon
     let ctx = PageContext { host: CONFIG.public_host.clone() };
 
     let content = if user_agent.to_string().starts_with("curl") {
-        headers.insert("Content-Type", "text/plain".parse().unwrap());
+        headers.insert(CONTENT_TYPE, "text/plain".parse().unwrap());
         page.render_term(ctx)
     } else {
-        headers.insert("Content-Type", "text/html".parse().unwrap());
+        headers.insert(CONTENT_TYPE, "text/html".parse().unwrap());
         page.render_html(ctx)
     };
 
     (StatusCode::OK, headers, content)
+}
+
+const FAVICON_STR: &[u8] = include_bytes!("assets/favicon.ico");
+async fn get_favicon() -> impl axum::response::IntoResponse {
+    let mut headers = HeaderMap::new();
+    headers.insert(CONTENT_TYPE, "image/x-icon".parse().unwrap());
+    (StatusCode::OK, headers, FAVICON_STR)
 }
 
 // 404 handler

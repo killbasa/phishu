@@ -13,7 +13,6 @@ FROM scratch
 
 ENV HOST=0.0.0.0
 
-COPY ./assets /assets
 COPY --from=builder /temp/target/x86_64-unknown-linux-musl/release/phishu /phishu
 
 EXPOSE 3000
