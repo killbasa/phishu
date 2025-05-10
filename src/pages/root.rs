@@ -24,6 +24,11 @@ impl Render for Page {
         let legend = [
             format!(
                 "{:<47} {:<52} │",
+                light_blue_text(&format_url(&CONFIG.public_host).to_string()),
+                "Landing page"
+            ),
+            format!(
+                "{:<47} {:<52} │",
                 light_blue_text(&format!("{}/{}", format_url(&CONFIG.public_host), "info")),
                 format!("Check information about {}", CONFIG.vtuber.name)
             ),
@@ -40,6 +45,7 @@ impl Render for Page {
         ];
 
         let commands = [
+            format!("{:<115} │", format_command("curl", &CONFIG.public_host),),
             format!("{:<115} │", format_command("curl", &format!("{}/info", CONFIG.public_host)),),
             format!(
                 "{:<115} │",
