@@ -34,6 +34,7 @@ pub fn get_db_videos() -> Result<Vec<YoutubeVideo>> {
         "SELECT id,title,scheduled_time,start_time,end_time
 			FROM videos
 			WHERE end_time is null
+			ORDER BY scheduled_time DESC
 			LIMIT 10",
     )?;
 
@@ -84,26 +85,9 @@ pub fn upsert_db_videos(videos: Vec<YoutubeVideo>) -> Result<()> {
 
     for video in videos {
         tx.execute(
-            "INSERT OR IGNORE INTO videos (id,title,scheduled_time,start_time,end_time)
+            "INSERT OR REPLACE INTO videos (id,title,scheduled_time,start_time,end_time)
 				VALUES (?1,?2,?3,?4,?5)",
             params![video.id, video.title, video.scheduled_time, video.start_time, video.end_time],
-        )?;
-    }
-
-    tx.commit()?;
-    Ok(())
-}
-
-pub fn update_db_videos(videos: Vec<YoutubeVideo>) -> Result<()> {
-    let mut conn = DB.lock().expect("failed to lock DB");
-    let tx = conn.transaction()?;
-
-    for video in videos {
-        tx.execute(
-            "UPDATE videos
-				SET scheduled_time = ?1, start_time = ?2, end_time = ?3
-				WHERE id = ?4",
-            params![video.scheduled_time, video.start_time, video.end_time, video.id],
         )?;
     }
 

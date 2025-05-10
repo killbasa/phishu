@@ -44,16 +44,9 @@ impl Render for Page {
 }
 
 async fn get_videos(is_term: bool) -> Vec<String> {
-    let mut videos = sqlite::get_db_videos().unwrap_or_else(|_| {
+    let videos = sqlite::get_db_videos().unwrap_or_else(|_| {
         tracing::error!("failed to fetch videos from db");
         Vec::new()
-    });
-
-    videos.sort_by(|a, b| {
-        let a_time = a.start_time.as_ref().unwrap_or(&a.scheduled_time);
-        let b_time = b.start_time.as_ref().unwrap_or(&b.scheduled_time);
-
-        a_time.cmp(b_time)
     });
 
     let mut video_list = Vec::<String>::new();

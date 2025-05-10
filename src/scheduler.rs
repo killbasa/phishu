@@ -48,8 +48,7 @@ async fn check_videos() -> Result<()> {
                 tracing::debug!("{} (https://youtube.com/watch?v={})", video.title, video.id);
             }
 
-            sqlite::upsert_db_videos(videos.clone())?;
-            sqlite::update_db_videos(videos)?;
+            sqlite::upsert_db_videos(videos)?;
 
             pages::refresh_page(pages::Pages::Upcoming).await?;
             pages::refresh_page(pages::Pages::LastSeen).await?;
