@@ -83,8 +83,6 @@ pub fn upsert_db_videos(videos: Vec<YoutubeVideo>) -> Result<()> {
     let tx = conn.transaction()?;
 
     for video in videos {
-        println!("upserting video {:?}", video.end_time);
-
         tx.execute(
             "INSERT OR IGNORE INTO videos (id,title,scheduled_time,start_time,end_time)
 				VALUES (?1,?2,?3,?4,?5)",
