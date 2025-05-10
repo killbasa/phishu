@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
     let state = AppState {};
 
     let router = Router::new() //
-        .fallback(fallback)
+        .fallback(Redirect::temporary("/"))
         // Routes
         .route("/", get(get_root))
         .route("/info", get(get_info))
@@ -112,11 +112,6 @@ async fn get_embed() -> impl axum::response::IntoResponse {
     headers.insert(CONTENT_TYPE, "image/webp".parse().unwrap());
     headers.insert(CACHE_CONTROL, "immutable,max-age=31536000".parse().unwrap());
     (StatusCode::OK, headers, EMBED_STR)
-}
-
-// 404 handler
-async fn fallback(uri: axum::http::Uri) -> impl axum::response::IntoResponse {
-    (axum::http::StatusCode::NOT_FOUND, format!("no route {}", uri))
 }
 
 // GET /
