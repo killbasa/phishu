@@ -26,6 +26,8 @@ pub async fn init_scheduler() -> Result<()> {
 
     scheduler.start().await?;
 
+    check_videos().await.expect("failed to check videos");
+
     Ok(())
 }
 

@@ -58,7 +58,8 @@ pub fn get_db_most_recent_video() -> Result<Option<YoutubeVideo>> {
     let mut stmt = conn.prepare(
         "SELECT id,title,scheduled_time,start_time,end_time
 			FROM videos
-			ORDER BY end_time DESC
+			WHERE end_time is null
+			ORDER BY end_time DESC NULLS FIRST
 			LIMIT 1",
     )?;
 
@@ -82,6 +83,8 @@ pub fn upsert_db_videos(videos: Vec<YoutubeVideo>) -> Result<()> {
     let tx = conn.transaction()?;
 
     for video in videos {
+        println!("upserting video {:?}", video.end_time);
+
         tx.execute(
             "INSERT OR IGNORE INTO videos (id,title,scheduled_time,start_time,end_time)
 				VALUES (?1,?2,?3,?4,?5)",

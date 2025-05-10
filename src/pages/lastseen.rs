@@ -3,7 +3,7 @@ use anyhow::Result;
 use crate::{
     config::CONFIG,
     sqlite::get_db_most_recent_video,
-    utils::{self, hydrate_page},
+    utils::{self, hydrate_page, light_blue_text},
 };
 
 use super::{PageContext, Render};
@@ -17,16 +17,15 @@ impl Render for Page {
         let video = get_db_most_recent_video()?;
 
         if let Some(video) = video {
+            let video_url = light_blue_text(&format!("https://youtube.com/watch?v={}", video.id));
+
             match video.end_time {
                 Some(end) => {
                     let (_date, diff) = utils::humanize_time(&end);
-                    return Ok(format!("phish was last seen {}", diff));
+                    return Ok(format!("phish was last seen {} at {}", diff, &video_url));
                 }
                 None => {
-                    return Ok(format!(
-                        "phish is live at https://youtube.com/watch?v={} !",
-                        video.id
-                    ));
+                    return Ok(format!("phish is live at {}", &video_url));
                 }
             }
         }
