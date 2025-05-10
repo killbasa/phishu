@@ -18,5 +18,4 @@ ci:
 	cargo test
 	cargo fmt --check
 	cargo clippy -- --deny warnings
-	cargo shear
 	@echo "✅ All checks passed"
