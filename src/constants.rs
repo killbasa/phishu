@@ -1,7 +1,20 @@
-use colored::CustomColor;
+use once_cell::sync::Lazy;
 
 pub static LIGHT_BLUE_ANSI: &str = "\x1b[38;5;117m";
-pub static LIGHT_BLUE: CustomColor = CustomColor { r: 135, g: 215, b: 255 };
-
 pub static GREEN_ANSI: &str = "\x1b[38;5;120m";
-pub static GREEN: CustomColor = CustomColor { r: 135, g: 255, b: 135 };
+pub static BRIGHT_RED_ANSI: &str = "\x1b[38;5;196m";
+pub static BRIGHT_YELLOW_ANSI: &str = "\x1b[38;5;226m";
+
+pub static HTML_CSP: Lazy<String> = Lazy::new(|| {
+    [
+        "default-src 'none'", //
+        "style-src-elem 'nonce-html-style'",
+        "style-src-attr 'unsafe-inline'",
+        "img-src 'self' https://img.youtube.com",
+        // "report-uri http://localhost:3000/csp-report",
+    ]
+    .join("; ")
+});
+
+// style="color:#87d7ff"
+// style="color:#87ff87"

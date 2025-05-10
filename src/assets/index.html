@@ -28,19 +28,19 @@
 			content="A little program for TRiGGERPHiSH 🎮🌊"
 		/>
 
-		<title>TRiGGERPHiSH</title>
+		<title>{{title}}</title>
 
-		<style>
+		<style nonce="html-style">
 			* {
 				margin: 0;
 				padding: 0;
+				box-sizing: border-box;
 			}
 
 			body {
 				display: flex;
 				justify-content: center;
-				align-items: center;
-				height: 100vh;
+				min-height: 100vh;
 				background-color: black;
 				color: white;
 				font-family: Arial, sans-serif;
@@ -48,25 +48,7 @@
 			}
 
 			pre {
-				padding: 1rem 0;
-			}
-
-			@media screen and (max-width: 700px) {
-				body {
-					font-size: 11px;
-				}
-			}
-
-			@media screen and (max-width: 560px) {
-				body {
-					font-size: 9px;
-				}
-			}
-
-			@media screen and (max-width: 460px) {
-				body {
-					font-size: 7px;
-				}
+				padding: 2rem 0;
 			}
 		</style>
 	</head>

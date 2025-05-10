@@ -1,6 +1,6 @@
 use crate::{
     config::CONFIG,
-    utils::{green_text, hydrate_page, lightblue_text},
+    utils::{green_text, hydrate_page, light_blue_text},
 };
 
 use super::{PageContext, Render};
@@ -16,25 +16,31 @@ const ROOT_LOGO: &str = r#"
 pub struct Page {}
 
 impl Render for Page {
-    fn render_term(&self, ctx: PageContext) -> String {
-        let logo = lightblue_text(ROOT_LOGO);
+    async fn render_term(&self, ctx: PageContext) -> String {
+        let logo = light_blue_text(ROOT_LOGO);
 
         let legend = [
             format!(
-                "{:<60} {:<54} │",
-                format_command("curl", &format!("{}/info", &ctx.host)),
-                "Get information about TRiGGERPHiSH"
+                "{:<47} {:<52} │",
+                light_blue_text(&format!("{}/{}", format_url(&ctx.host), "info")),
+                format!("Get information about {}", CONFIG.vtuber.name)
             ),
             format!(
-                "{:<60} {:<54} │",
-                format_command("curl", &format!("{}/upcoming", &ctx.host)),
+                "{:<47} {:<52} │",
+                light_blue_text(&format!("{}/{}", format_url(&ctx.host), "upcoming")),
                 "See upcoming streams and events"
             ),
             format!(
-                "{:<60} {:<54} │",
-                format_command("curl", &format!("{}/lastseen", &ctx.host)),
-                "Check when TRiGGERPHiSH was last online"
+                "{:<47} {:<52} │",
+                light_blue_text(&format!("{}/{}", format_url(&ctx.host), "lastseen")),
+                format!("Check when {} was last online", CONFIG.vtuber.name)
             ),
+        ];
+
+        let commands = [
+            format!("{:<115} │", format_command("curl", &format!("{}/info", &ctx.host)),),
+            format!("{:<115} │", format_command("curl", &format!("{}/upcoming", &ctx.host)),),
+            format!("{:<115} │", format_command("curl", &format!("{}/lastseen", &ctx.host)),),
         ];
 
         let about_text = [
@@ -49,14 +55,14 @@ impl Render for Page {
         ];
 
         let social_media: Vec<String> = [
-            ("Website", 0),
-            ("Store", 1),
-            ("YouTube", 2),
-            ("Twitter", 3),
-            ("Discord", 4),
-            ("Twitch", 5),
-            ("TikTok", 6),
-            ("Reddit", 7),
+            ("YouTube", 0),
+            ("Twitter", 1),
+            ("Discord", 2),
+            ("Twitch", 3),
+            ("TikTok", 4),
+            ("Reddit", 5),
+            ("Website", 6),
+            ("Store", 7),
         ]
         .iter()
         .map(|(platform, i)| format_social(platform, &ctx.host, about_text[*i]))
@@ -71,26 +77,32 @@ impl Render for Page {
 	│ {}
 	└───────────────────────────────────────────────────────────────────────────────────────┘
 
+	┌─ Commands ────────────────────────────────────────────────────────────────────────────┐
+	│ You can also view all of the above pages in a terminal using these commands:          │
+	│ {}
+	└───────────────────────────────────────────────────────────────────────────────────────┘
+
 	┌─ Social Media ───────────────────────────┐   ┌─ About ────────────────────────────────┐
 	│ {}
 	└──────────────────────────────────────────┘   └────────────────────────────────────────┘
 
-       This site is entirely fan-made • Source: {}"#,
+	This site is entirely fan-made • Source: {}"#,
             logo,
             legend.join("\n\t│ "),
+            commands.join("\n\t│ "),
             social_media.join("\n\t│ "),
-            lightblue_text(&CONFIG.git_repo),
+            light_blue_text(&CONFIG.git_repo),
         )
     }
 
-    fn render_html(&self, ctx: PageContext) -> String {
-        let page = self.render_term(ctx);
-        hydrate_page(&page)
+    async fn render_html(&self, ctx: PageContext) -> String {
+        let page = self.render_term(ctx.clone()).await;
+        hydrate_page(&ctx.host, &page, &CONFIG.vtuber.name)
     }
 }
 
 fn format_command(command: &str, path: &str) -> String {
-    format!("{} {}", green_text(command), lightblue_text(path))
+    format!("{} {}", green_text(command), light_blue_text(path))
 }
 
 fn format_social(platform: &str, host: &str, description: &str) -> String {
@@ -100,7 +112,7 @@ fn format_social(platform: &str, host: &str, description: &str) -> String {
         format!(
             "{:<9} {:<45} │   │ {:<38} │",
             platform,
-            lightblue_text(&format!("{}/{}", format_url(host), platform.to_lowercase())),
+            light_blue_text(&format!("{}/{}", format_url(host), platform.to_lowercase())),
             description
         )
     }
