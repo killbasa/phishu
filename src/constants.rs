@@ -11,10 +11,6 @@ pub static HTML_CSP: Lazy<String> = Lazy::new(|| {
         "style-src-elem 'nonce-html-style'",
         "style-src-attr 'unsafe-inline'",
         "img-src 'self' https://img.youtube.com",
-        // "report-uri http://localhost:3000/csp-report",
     ]
     .join("; ")
 });
-
-// style="color:#87d7ff"
-// style="color:#87ff87"

@@ -85,19 +85,14 @@ async fn get_video_ids_xml() -> Result<Vec<String>> {
 
 fn process_raw_video(raw_video: RawYoutubeVideo) -> Option<YoutubeVideo> {
     if let Some(live) = raw_video.live_streaming_details {
-        let end_time = live.actual_end_time;
-        let scheduled_time = live.scheduled_start_time;
-
-        if scheduled_time.is_some() && end_time.is_none() {
-            let start_time = live.actual_start_time;
-
+        // Only care about live streams
+        if live.scheduled_start_time.is_some() {
             return Some(YoutubeVideo {
                 id: raw_video.id.clone(),
-                channel: raw_video.snippet.channel_title,
                 title: raw_video.snippet.title,
-                start_time,
-                scheduled_time: scheduled_time.unwrap(),
-                thumbnail: format!("https://img.youtube.com/vi/{}/maxresdefault.jpg", raw_video.id),
+                scheduled_time: live.scheduled_start_time.unwrap(),
+                start_time: live.actual_start_time,
+                end_time: live.actual_end_time,
             });
         }
     }

@@ -14,7 +14,8 @@ RUN cargo build --locked --release
 FROM debian:12.10-slim
 
 RUN apt-get update -y && \
-	apt-get install -y openssl && \
+	apt-get install -y openssl ca-certificates && \
+	update-ca-certificates && \
 	rm -rf /var/lib/apt/lists/*
 
 ENV HOST=0.0.0.0

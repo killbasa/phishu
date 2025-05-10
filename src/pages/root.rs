@@ -1,3 +1,5 @@
+use anyhow::Result;
+
 use crate::{
     config::CONFIG,
     utils::{green_text, hydrate_page, light_blue_text},
@@ -16,31 +18,37 @@ const ROOT_LOGO: &str = r#"
 pub struct Page {}
 
 impl Render for Page {
-    async fn render_term(&self, ctx: PageContext) -> String {
+    async fn render_term(&self, _ctx: PageContext) -> Result<String> {
         let logo = light_blue_text(ROOT_LOGO);
 
         let legend = [
             format!(
                 "{:<47} {:<52} │",
-                light_blue_text(&format!("{}/{}", format_url(&ctx.host), "info")),
-                format!("Get information about {}", CONFIG.vtuber.name)
+                light_blue_text(&format!("{}/{}", format_url(&CONFIG.public_host), "info")),
+                format!("Check information about {}", CONFIG.vtuber.name)
             ),
             format!(
                 "{:<47} {:<52} │",
-                light_blue_text(&format!("{}/{}", format_url(&ctx.host), "upcoming")),
-                "See upcoming streams and events"
+                light_blue_text(&format!("{}/{}", format_url(&CONFIG.public_host), "upcoming")),
+                "See upcoming streams"
             ),
             format!(
                 "{:<47} {:<52} │",
-                light_blue_text(&format!("{}/{}", format_url(&ctx.host), "lastseen")),
+                light_blue_text(&format!("{}/{}", format_url(&CONFIG.public_host), "lastseen")),
                 format!("Check when {} was last online", CONFIG.vtuber.name)
             ),
         ];
 
         let commands = [
-            format!("{:<115} │", format_command("curl", &format!("{}/info", &ctx.host)),),
-            format!("{:<115} │", format_command("curl", &format!("{}/upcoming", &ctx.host)),),
-            format!("{:<115} │", format_command("curl", &format!("{}/lastseen", &ctx.host)),),
+            format!("{:<115} │", format_command("curl", &format!("{}/info", CONFIG.public_host)),),
+            format!(
+                "{:<115} │",
+                format_command("curl", &format!("{}/upcoming", CONFIG.public_host)),
+            ),
+            format!(
+                "{:<115} │",
+                format_command("curl", &format!("{}/lastseen", CONFIG.public_host)),
+            ),
         ];
 
         let about_text = [
@@ -65,10 +73,10 @@ impl Render for Page {
             ("Store", 7),
         ]
         .iter()
-        .map(|(platform, i)| format_social(platform, &ctx.host, about_text[*i]))
+        .map(|(platform, i)| format_social(platform, about_text[*i]))
         .collect();
 
-        format!(
+        Ok(format!(
             r#"{}
 
 	A little program for TRiGGERPHiSH 🎮🌊
@@ -92,12 +100,13 @@ impl Render for Page {
             commands.join("\n\t│ "),
             social_media.join("\n\t│ "),
             light_blue_text(&CONFIG.git_repo),
-        )
+        ))
     }
 
-    async fn render_html(&self, ctx: PageContext) -> String {
-        let page = self.render_term(ctx.clone()).await;
-        hydrate_page(&ctx.host, &page, &CONFIG.vtuber.name)
+    async fn render_html(&self, ctx: PageContext) -> Result<String> {
+        let page = self.render_term(ctx.clone()).await?;
+
+        hydrate_page(&page, &CONFIG.vtuber.name)
     }
 }
 
@@ -105,14 +114,18 @@ fn format_command(command: &str, path: &str) -> String {
     format!("{} {}", green_text(command), light_blue_text(path))
 }
 
-fn format_social(platform: &str, host: &str, description: &str) -> String {
+fn format_social(platform: &str, description: &str) -> String {
     if platform.is_empty() {
         format!("{:<40} │   │ {:<38} │", "", description)
     } else {
         format!(
             "{:<9} {:<45} │   │ {:<38} │",
             platform,
-            light_blue_text(&format!("{}/{}", format_url(host), platform.to_lowercase())),
+            light_blue_text(&format!(
+                "{}/{}",
+                format_url(&CONFIG.public_host),
+                platform.to_lowercase()
+            )),
             description
         )
     }

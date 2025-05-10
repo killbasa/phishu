@@ -6,7 +6,6 @@ use serde::Deserialize;
 #[serde(rename_all = "camelCase")]
 pub struct VideoSnippet {
     pub title: String,
-    pub channel_title: String,
 }
 
 #[derive(Deserialize, Debug)]

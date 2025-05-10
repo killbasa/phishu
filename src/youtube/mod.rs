@@ -17,12 +17,11 @@ pub struct YoutubeChannel {
     pub profile_picture: String,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct YoutubeVideo {
     pub id: String,
-    pub channel: String,
     pub title: String,
-    pub start_time: Option<String>,
     pub scheduled_time: String,
-    pub thumbnail: String,
+    pub start_time: Option<String>,
+    pub end_time: Option<String>,
 }
