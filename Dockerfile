@@ -13,6 +13,8 @@ RUN cargo build --locked --release
 
 FROM debian:12.10-slim
 
+WORKDIR /etc/phishu
+
 RUN apt-get update -y && \
 	apt-get install -y openssl ca-certificates && \
 	update-ca-certificates && \
@@ -20,8 +22,8 @@ RUN apt-get update -y && \
 
 ENV HOST=0.0.0.0
 
-COPY --from=builder /temp/target/release/phishu /phishu
+COPY --from=builder /temp/target/release/phishu /etc/phishu/app
 
 EXPOSE 3000
 
-ENTRYPOINT [ "/phishu" ]
+ENTRYPOINT [ "/etc/phishu/app" ]
