@@ -1,5 +1,5 @@
 # Phishu
 
-Birthday project for TRiGGERPHiSH 🎮🌊
+A little program for TRiGGERPHiSH 🎮🌊
 
 ![Project preview](.github/landing_page.png)
