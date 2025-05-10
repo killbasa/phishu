@@ -2,7 +2,7 @@ run:
 	cargo run
 
 watch:
-	DEBUG_LOG=1 cargo watch --ignore db.sqlite -x run
+	DEBUG_LOG=1 cargo watch --ignore data/db.sqlite -x run
 
 build:
 	cargo build --locked

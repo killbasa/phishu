@@ -18,7 +18,8 @@ WORKDIR /etc/phishu
 RUN apt-get update -y && \
 	apt-get install -y openssl ca-certificates && \
 	update-ca-certificates && \
-	rm -rf /var/lib/apt/lists/*
+	rm -rf /var/lib/apt/lists/* && \
+	mkdir -p /etc/phishu/data
 
 ENV HOST=0.0.0.0
 
