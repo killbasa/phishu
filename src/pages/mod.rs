@@ -36,14 +36,14 @@ pub async fn refresh_page(page: Pages) -> Result<()> {
         term.lock().unwrap().remove(&page);
 
         tracing::debug!("cache cleared for {:?} term", page);
-        upcoming::Page {}.render_term(PageContext { is_term: true }).await?;
+        page.render_term(PageContext { is_term: true }).await?;
     }
 
     if let Some(html) = HTML_CACHE.get() {
         html.lock().unwrap().remove(&page);
 
         tracing::debug!("cache cleared for {:?} html", page);
-        upcoming::Page {}.render_html(PageContext { is_term: false }).await?;
+        page.render_html(PageContext { is_term: false }).await?;
     }
 
     Ok(())
