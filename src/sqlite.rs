@@ -58,7 +58,7 @@ pub fn get_db_most_recent_video() -> Result<Option<YoutubeVideo>> {
     let mut stmt = conn.prepare(
         "SELECT id,title,scheduled_time,start_time,end_time
 			FROM videos
-			WHERE end_time is null
+			WHERE start_time is not null
 			ORDER BY end_time DESC NULLS FIRST
 			LIMIT 1",
     )?;

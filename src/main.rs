@@ -57,6 +57,7 @@ async fn main() -> Result<()> {
         .route("/store", get(Redirect::temporary(&CONFIG.vtuber.socials.store)))
         // Assets
         .route("/favicon.ico", get(get_favicon))
+        .route("/embed.webp", get(get_embed))
         .with_state(state);
 
     let host = Ipv4Addr::from_str(&CONFIG.server.host).expect("invalid host");
@@ -95,11 +96,20 @@ async fn render(user_agent: UserAgent, page: Pages) -> impl axum::response::Into
     (StatusCode::OK, headers, content)
 }
 
+// GET /favicon.ico
 const FAVICON_STR: &[u8] = include_bytes!("assets/favicon.ico");
 async fn get_favicon() -> impl axum::response::IntoResponse {
     let mut headers = HeaderMap::new();
     headers.insert(CONTENT_TYPE, "image/x-icon".parse().unwrap());
     (StatusCode::OK, headers, FAVICON_STR)
+}
+
+// GET /embed.png
+const EMBED_STR: &[u8] = include_bytes!("assets/embed.webp");
+async fn get_embed() -> impl axum::response::IntoResponse {
+    let mut headers = HeaderMap::new();
+    headers.insert(CONTENT_TYPE, "image/webp".parse().unwrap());
+    (StatusCode::OK, headers, EMBED_STR)
 }
 
 // 404 handler
