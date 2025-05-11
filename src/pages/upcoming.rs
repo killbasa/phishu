@@ -81,14 +81,14 @@ pub fn format_video(video: &YoutubeVideo, is_terminal: bool) -> String {
 
         entry.push_str(&format!(
             " └─   started: {}\n",
-            light_blue_text(&format!("{} ({})", date, diff))
+            light_blue_text(&format!("{} UTC ({})", date, diff))
         ));
     } else {
         let (date, diff) = utils::humanize_time(&video.scheduled_time);
 
         entry.push_str(&format!(
             " └─ scheduled: {}\n",
-            light_blue_text(&format!("{} ({})", date, diff))
+            light_blue_text(&format!("{} UTC ({})", date, diff))
         ));
     }
 

@@ -53,7 +53,7 @@ pub fn hydrate_page(page: &str, title: &str) -> Result<String> {
 
 const TIME_FORMAT: &str = "%Y-%m-%d %H:%M";
 pub fn humanize_time(time: &str) -> (String, String) {
-    let tz = &chrono::Local::now().timezone();
+    let tz = &chrono::Utc::now().timezone();
     let parsed = chrono::DateTime::parse_from_rfc3339(time).unwrap();
     let humanized = HumanTime::from(parsed);
 
