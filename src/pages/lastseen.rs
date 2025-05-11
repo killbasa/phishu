@@ -1,9 +1,11 @@
 use anyhow::Result;
 
 use crate::{
+    colors::{green_text, light_blue_text},
     config::CONFIG,
     sqlite::get_db_most_recent_video,
-    utils::{self, hydrate_page, light_blue_text},
+    time,
+    utils::hydrate_page,
 };
 
 use super::{PageContext, Render};
@@ -21,8 +23,12 @@ impl Render for Page {
 
             match video.end_time {
                 Some(end) => {
-                    let (_date, diff) = utils::humanize_time(&end);
-                    return Ok(format!("phish was last seen {} at {}", diff, &video_url));
+                    let (_date, diff) = time::humanize(&end);
+                    return Ok(format!(
+                        "phish was last seen {} at {}",
+                        green_text(&diff),
+                        &video_url
+                    ));
                 }
                 None => {
                     return Ok(format!("phish is live at {}", &video_url));

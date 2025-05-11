@@ -1,8 +1,9 @@
 use anyhow::Result;
 
 use crate::{
+    colors::{green_text, light_blue_text},
     config::CONFIG,
-    utils::{green_text, hydrate_page, light_blue_text},
+    utils::hydrate_page,
     youtube,
 };
 

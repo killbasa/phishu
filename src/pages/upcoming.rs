@@ -1,12 +1,12 @@
 use anyhow::Result;
 
 use crate::{
-    config::CONFIG,
-    sqlite,
-    utils::{
-        self, VIDEO_THUMBNAIL_REGEX, bright_red_text, bright_yellow_text, green_text, hydrate_page,
-        light_blue_text,
+    colors::{
+        bright_purple_text, bright_red_text, bright_yellow_text, green_text, light_blue_text,
     },
+    config::CONFIG,
+    sqlite, time,
+    utils::{hydrate_page, hydrate_thumbnail},
     youtube::YoutubeVideo,
 };
 
@@ -31,15 +31,7 @@ impl Render for Page {
 
         let page = hydrate_page(&video_list.join("\n"), &title)?;
 
-        Ok(VIDEO_THUMBNAIL_REGEX
-            .replace_all(&page, |caps: &regex::Captures| {
-                let video_id = caps.get(1).unwrap().as_str();
-                format!(
-                    r#"<img src="https://img.youtube.com/vi/{}/maxresdefault.jpg" style="max-height:250px;margin:2rem auto 0 auto;" />"#,
-                    video_id
-                )
-            })
-            .to_string())
+        Ok(hydrate_thumbnail(&page))
     }
 }
 
@@ -58,10 +50,13 @@ async fn get_videos(is_term: bool) -> Vec<String> {
     video_list
 }
 
-pub fn format_video(video: &YoutubeVideo, is_terminal: bool) -> String {
-    let status: String = match video.start_time.is_some() {
-        true => bright_red_text("[live]"),
-        false => bright_yellow_text("[upcoming]"),
+fn format_video(video: &YoutubeVideo, is_terminal: bool) -> String {
+    let status: String = match video.end_time.is_some() {
+        true => bright_purple_text("[ended]"),
+        false => match video.start_time.is_some() {
+            true => bright_red_text("[live]"),
+            false => bright_yellow_text("[upcoming]"),
+        },
     };
 
     let title = green_text(&video.title);
@@ -77,14 +72,14 @@ pub fn format_video(video: &YoutubeVideo, is_terminal: bool) -> String {
     };
 
     if let Some(start_time) = &video.start_time {
-        let (date, diff) = utils::humanize_time(start_time);
+        let (date, diff) = time::humanize(start_time);
 
         entry.push_str(&format!(
             " └─   started: {}\n",
             light_blue_text(&format!("{} UTC ({})", date, diff))
         ));
     } else {
-        let (date, diff) = utils::humanize_time(&video.scheduled_time);
+        let (date, diff) = time::humanize(&video.scheduled_time);
 
         entry.push_str(&format!(
             " └─ scheduled: {}\n",

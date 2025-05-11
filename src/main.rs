@@ -1,8 +1,10 @@
+mod colors;
 mod config;
 mod constants;
 mod pages;
 mod scheduler;
 mod sqlite;
+mod time;
 mod utils;
 mod youtube;
 
