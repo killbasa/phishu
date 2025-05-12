@@ -21,7 +21,7 @@ impl Render for Page {
         let video = get_db_most_recent_video()?;
 
         if let Some(video) = video {
-            let video_url = &format!("https://youtube.com/watch?v={}", video.id.light_blue());
+            let video_url = &format!("https://youtube.com/watch?v={}", video.id).light_blue();
 
             match video.end_time {
                 Some(end) => {

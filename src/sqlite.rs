@@ -34,7 +34,7 @@ pub fn get_db_videos() -> Result<Vec<YoutubeVideo>> {
         "SELECT id,title,scheduled_time,start_time,end_time
 			FROM videos
 			WHERE end_time is null
-			ORDER BY scheduled_time DESC
+			ORDER BY scheduled_time ASC
 			LIMIT 10",
     )?;
 

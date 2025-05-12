@@ -16,6 +16,8 @@ const HTML_STR: &str = include_str!("index.html");
 
 pub struct Page {}
 
+// TODO - Update term page to use the new format
+
 impl Render for Page {
     async fn render_term(&self, _ctx: PageContext) -> Result<String> {
         let logo = ROOT_LOGO.light_blue();

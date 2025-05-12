@@ -28,9 +28,9 @@ impl Render for Page {
         Ok(format!(
             "\n{0: <9}{1}\n{2: <9}{3}\n{4: <9}{5}\n{6: <9}{7}\n{8: <9}{9}",
             "channel",
-            &channel.name.light_blue(),
+            &channel.name.green(),
             "url",
-            &CONFIG.vtuber.channel_url.green(),
+            &CONFIG.vtuber.channel_url.light_blue(),
             "id",
             &CONFIG.vtuber.id.green(),
             "subs",

@@ -2,14 +2,14 @@ name: Publish
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "src/**"
-      - "Cargo.lock"
-      - "Cargo.toml"
-      - "Dockerfile"
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - "src/**"
+  #     - "Cargo.lock"
+  #     - "Cargo.toml"
+  #     - "Dockerfile"
 
 permissions:
   contents: read
