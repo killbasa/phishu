@@ -32,28 +32,77 @@
 		<title>{{title}}</title>
 
 		<style nonce="html-style">
+			:root {
+				--light-blue: #87d7ff;
+				--green: #87ff87;
+			}
+
 			* {
 				margin: 0;
 				padding: 0;
 				box-sizing: border-box;
+				font-family: monospace;
 			}
 
 			body {
 				display: flex;
-				justify-content: center;
-				min-height: 100vh;
-				background-color: black;
+				flex-direction: column;
+				background-color: #0c0c0c;
 				color: white;
-				font-family: Arial, sans-serif;
-				font-size: 13px;
+				font-size: 14px;
+				margin: 0 auto;
+				padding: 2rem;
+				width: fit-content;
 			}
 
-			pre {
-				padding: 2rem 0;
+			main {
+				display: flex;
+				flex-direction: column;
+				gap: 2rem;
+			}
+
+			h1 {
+				font-size: 6rem;
+				line-height: 4rem;
+				color: var(--light-blue);
+				margin-bottom: 2rem;
+			}
+
+			a {
+				color: var(--light-blue);
+			}
+
+			tr td:last-child {
+				padding-left: 1rem;
+			}
+
+			.flex-col {
+				display: flex;
+				flex-direction: column;
+			}
+
+			.light-blue {
+				color: var(--light-blue);
+			}
+
+			.term-comment {
+				opacity: 50%;
+			}
+
+			.term-cmd {
+				color: var(--green);
+				margin-bottom: 0.25rem;
+			}
+
+			@media screen and (max-width: 700px) {
+				h1 {
+					font-size: 3.5rem;
+					line-height: 2rem;
+				}
 			}
 		</style>
 	</head>
 	<body>
-		<pre>{{content}}</pre>
+		{{main}}
 	</body>
 </html>

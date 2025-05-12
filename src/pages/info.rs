@@ -1,15 +1,25 @@
 use anyhow::Result;
 
 use crate::{
-    colors::{green_text, light_blue_text},
+    colors::Colorize,
     config::CONFIG,
-    utils::hydrate_page,
+    utils::{compose_page, fix_colored_links},
     youtube,
 };
 
 use super::{PageContext, Render};
 
+const HTML_STR: &str = include_str!("info.html");
+
 pub struct Page {}
+
+/*
+TODO	add info from wiki page
+        goals
+        birthday
+        fan name
+        ref sheets
+*/
 
 impl Render for Page {
     async fn render_term(&self, _ctx: PageContext) -> Result<String> {
@@ -18,21 +28,30 @@ impl Render for Page {
         Ok(format!(
             "\n{0: <9}{1}\n{2: <9}{3}\n{4: <9}{5}\n{6: <9}{7}\n{8: <9}{9}",
             "channel",
-            light_blue_text(&channel.name),
+            &channel.name.light_blue(),
             "url",
-            green_text(&CONFIG.vtuber.channel_url),
+            &CONFIG.vtuber.channel_url.green(),
             "id",
-            green_text(&CONFIG.vtuber.id),
+            &CONFIG.vtuber.id.green(),
             "subs",
-            green_text(&channel.subscriber_count),
+            &channel.subscriber_count.green(),
             "videos",
-            green_text(&channel.video_count)
+            &channel.video_count.green()
         ))
     }
 
-    async fn render_html(&self, ctx: PageContext) -> Result<String> {
-        let page = self.render_term(ctx.clone()).await?;
+    async fn render_html(&self, _ctx: PageContext) -> Result<String> {
+        let channel = youtube::channels::get_channel_api().await?;
 
-        hydrate_page(&page, &format!("Info | {}", CONFIG.vtuber.name))
+        let mut html = HTML_STR
+            .replace("{{channel_name}}", &channel.name.green_html())
+            .replace("{{channel_url}}", &CONFIG.vtuber.channel_url.light_blue_html())
+            .replace("{{channel_id}}", &CONFIG.vtuber.id.green_html())
+            .replace("{{channel_subs}}", &channel.subscriber_count.green_html())
+            .replace("{{channel_videos}}", &channel.video_count.green_html());
+
+        html = fix_colored_links(&html);
+
+        compose_page(&html, &format!("Info | {}", CONFIG.vtuber.name))
     }
 }

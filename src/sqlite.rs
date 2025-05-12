@@ -33,7 +33,6 @@ pub fn get_db_videos() -> Result<Vec<YoutubeVideo>> {
     let mut stmt = conn.prepare(
         "SELECT id,title,scheduled_time,start_time,end_time
 			FROM videos
-			WHERE end_time is null
 			ORDER BY scheduled_time DESC
 			LIMIT 10",
     )?;

@@ -34,7 +34,7 @@ pub struct Config {
     pub youtube: YoutubeConfig,
     pub vtuber: VtuberConfig,
     pub git_repo: String,
-    pub public_host: String,
+    pub domain: String,
 }
 
 impl Config {
@@ -46,7 +46,7 @@ impl Config {
 
         Config {
             git_repo: "https://github.com/killbasa/phishu".to_string(),
-            public_host: env::var("PHISHU_DOMAIN").unwrap_or("localhost:3000".to_string()),
+            domain: env::var("PHISHU_DOMAIN").unwrap_or("localhost:3000".to_string()),
             server: ServerConfig {
                 host: env::var("HOST").unwrap_or("127.0.0.1".to_string()),
                 port: env::var("PORT").unwrap_or("3000".to_string()).parse().unwrap_or(3000),

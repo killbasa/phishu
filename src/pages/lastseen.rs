@@ -1,14 +1,16 @@
 use anyhow::Result;
 
 use crate::{
-    colors::{green_text, light_blue_text},
+    colors::Colorize,
     config::CONFIG,
     sqlite::get_db_most_recent_video,
     time,
-    utils::hydrate_page,
+    utils::{compose_page, fix_colored_links},
 };
 
 use super::{PageContext, Render};
+
+const HTML_STR: &str = include_str!("lastseen.html");
 
 pub struct Page {}
 
@@ -19,16 +21,12 @@ impl Render for Page {
         let video = get_db_most_recent_video()?;
 
         if let Some(video) = video {
-            let video_url = light_blue_text(&format!("https://youtube.com/watch?v={}", video.id));
+            let video_url = &format!("https://youtube.com/watch?v={}", video.id.light_blue());
 
             match video.end_time {
                 Some(end) => {
                     let (_date, diff) = time::humanize(&end);
-                    return Ok(format!(
-                        "phish was last seen {} at {}",
-                        green_text(&diff),
-                        &video_url
-                    ));
+                    return Ok(format!("phish was last seen {} at {}", &diff.green(), &video_url));
                 }
                 None => {
                     return Ok(format!("phish is live at {}", &video_url));
@@ -39,9 +37,29 @@ impl Render for Page {
         Ok("no recent videos".to_string())
     }
 
-    async fn render_html(&self, ctx: PageContext) -> Result<String> {
-        let page = self.render_term(ctx.clone()).await?;
+    async fn render_html(&self, _ctx: PageContext) -> Result<String> {
+        let video = get_db_most_recent_video()?;
 
-        hydrate_page(&page, &format!("Last seen | {}", CONFIG.vtuber.name))
+        let last_seen = match video {
+            None => "no recent videos".to_string(),
+            Some(video) => {
+                let video_url =
+                    &format!("https://youtube.com/watch?v={}", video.id).light_blue_html();
+
+                match video.end_time {
+                    Some(end) => {
+                        let (_date, diff) = time::humanize(&end);
+                        format!("phish was last seen {} at {}", &diff.green_html(), &video_url)
+                    }
+                    None => format!("phish is live at {}", &video_url),
+                }
+            }
+        };
+
+        let mut html = HTML_STR.replace("{{last_seen}}", &last_seen);
+
+        html = fix_colored_links(&html);
+
+        compose_page(&html, &format!("Last seen | {}", CONFIG.vtuber.name))
     }
 }

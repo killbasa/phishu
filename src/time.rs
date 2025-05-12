@@ -24,6 +24,13 @@ pub fn humanize(time: &str) -> (String, String) {
         .collect::<Vec<_>>()
         .join(" ");
 
+    if text.is_empty() {
+        return (
+            parsed.with_timezone(tz).format(TIME_FORMAT).to_string(), //
+            "now".into(),
+        );
+    }
+
     let humanized = match delta.cmp(&TimeDelta::zero()) {
         Ordering::Equal => "now".into(),
         Ordering::Greater => format!("in {}", text),

@@ -1,66 +1,71 @@
 use anyhow::Result;
 
 use crate::{
-    colors::{
-        bright_purple_text, bright_red_text, bright_yellow_text, green_text, light_blue_text,
-    },
+    colors::Colorize,
     config::CONFIG,
     sqlite, time,
-    utils::{hydrate_page, hydrate_thumbnail},
+    utils::{compose_page, fix_colored_links},
     youtube::YoutubeVideo,
 };
 
 use super::{PageContext, Render};
 
+const HTML_STR: &str = include_str!("upcoming.html");
+
 pub struct Page {}
 
 impl Render for Page {
-    async fn render_term(&self, ctx: PageContext) -> Result<String> {
-        let video_list = get_videos(ctx.is_term).await;
+    async fn render_term(&self, _ctx: PageContext) -> Result<String> {
+        let videos = sqlite::get_db_videos().unwrap_or_else(|_| {
+            tracing::error!("failed to fetch videos from db");
+            Vec::new()
+        });
+
+        let mut video_list = Vec::<String>::new();
+
+        for video in videos {
+            video_list.push(format_video(&video, true));
+        }
 
         Ok(video_list.join("\n"))
     }
 
-    async fn render_html(&self, ctx: PageContext) -> Result<String> {
-        let video_list = get_videos(ctx.is_term).await;
+    async fn render_html(&self, _ctx: PageContext) -> Result<String> {
         let title = format!("Upcoming streams | {}", CONFIG.vtuber.name);
+        let videos = sqlite::get_db_videos().unwrap_or_else(|_| {
+            tracing::error!("failed to fetch videos from db");
+            Vec::new()
+        });
 
-        if video_list.is_empty() {
-            return hydrate_page("no upcoming streams", &title);
+        if videos.is_empty() {
+            let html = HTML_STR.replace("{{video_list}}", "no upcoming streams");
+            return compose_page(&html, &title);
         }
 
-        let page = hydrate_page(&video_list.join("\n"), &title)?;
+        let mut video_list = Vec::<String>::new();
 
-        Ok(hydrate_thumbnail(&page))
+        for video in videos {
+            video_list.push(format_video_html(&video));
+        }
+
+        let mut html = HTML_STR.replace("{{video_list}}", &video_list.join(""));
+        html = fix_colored_links(&html);
+
+        compose_page(&html, &title)
     }
-}
-
-async fn get_videos(is_term: bool) -> Vec<String> {
-    let videos = sqlite::get_db_videos().unwrap_or_else(|_| {
-        tracing::error!("failed to fetch videos from db");
-        Vec::new()
-    });
-
-    let mut video_list = Vec::<String>::new();
-
-    for video in videos {
-        video_list.push(format_video(&video, is_term));
-    }
-
-    video_list
 }
 
 fn format_video(video: &YoutubeVideo, is_terminal: bool) -> String {
     let status: String = match video.end_time.is_some() {
-        true => bright_purple_text("[ended]"),
+        true => "[ended]".bright_purple(),
         false => match video.start_time.is_some() {
-            true => bright_red_text("[live]"),
-            false => bright_yellow_text("[upcoming]"),
+            true => "[live]".bright_red(),
+            false => "[upcoming]".bright_yellow(),
         },
     };
 
-    let title = green_text(&video.title);
-    let url = light_blue_text(&format!("https://www.youtube.com/watch?v={}", video.id));
+    let title = &video.title.green();
+    let url = &format!("https://www.youtube.com/watch?v={}", video.id).light_blue();
 
     let mut entry = match is_terminal {
         true => {
@@ -76,16 +81,46 @@ fn format_video(video: &YoutubeVideo, is_terminal: bool) -> String {
 
         entry.push_str(&format!(
             " └─   started: {}\n",
-            light_blue_text(&format!("{} UTC ({})", date, diff))
+            &format!("{} UTC ({})", date, diff).light_blue()
         ));
     } else {
         let (date, diff) = time::humanize(&video.scheduled_time);
 
         entry.push_str(&format!(
             " └─ scheduled: {}\n",
-            light_blue_text(&format!("{} UTC ({})", date, diff))
+            &format!("{} UTC ({})", date, diff).light_blue()
         ));
     }
 
     entry
+}
+
+fn format_video_html(video: &YoutubeVideo) -> String {
+    let status: String = match video.end_time.is_some() {
+        true => "[ended]".bright_purple_html(),
+        false => match video.start_time.is_some() {
+            true => "[live]".bright_red_html(),
+            false => "[upcoming]".bright_yellow_html(),
+        },
+    };
+    let url = &format!("https://www.youtube.com/watch?v={}", video.id).light_blue_html();
+    let (date, diff) = time::humanize(&video.scheduled_time);
+
+    format!(
+        r#"
+				<div class="flex-col">
+					<img src="https://img.youtube.com/vi/{}/maxresdefault.jpg" style="max-height:250px;margin:2rem auto 0 auto;" />
+					<div class="flex-col">
+						<span>{} {}</span>
+						<span style="padding-left: 4.5rem;white-space: pre"> ├─       url: {}</span>
+						<span style="padding-left: 4.5rem;white-space: pre"> └─   started: {}</span>
+					</div>
+				</div>
+				"#,
+        &video.id,
+        &status,
+        &video.title.green_html(),
+        url,
+        &format!("{} UTC ({})", date, diff).light_blue_html()
+    )
 }

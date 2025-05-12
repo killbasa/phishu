@@ -1,10 +1,6 @@
 use anyhow::Result;
 
-use crate::{
-    colors::{green_text, light_blue_text},
-    config::CONFIG,
-    utils::hydrate_page,
-};
+use crate::{colors::Colorize, config::CONFIG, utils::compose_page};
 
 use super::{PageContext, Render};
 
@@ -16,46 +12,42 @@ const ROOT_LOGO: &str = r#"
 	   ██║   ██║  ██║██║╚██████╔╝╚██████╔╝███████╗██║  ██║██║     ██║  ██║██║███████║██║  ██║
 	   ╚═╝   ╚═╝  ╚═╝╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝"#;
 
+const HTML_STR: &str = include_str!("index.html");
+
 pub struct Page {}
 
 impl Render for Page {
     async fn render_term(&self, _ctx: PageContext) -> Result<String> {
-        let logo = light_blue_text(ROOT_LOGO);
+        let logo = ROOT_LOGO.light_blue();
 
         let legend = [
             format!(
                 "{:<47} {:<52} │",
-                light_blue_text(&format_url(&CONFIG.public_host).to_string()),
+                &format_url(&CONFIG.domain).to_string().light_blue(),
                 "Landing page"
             ),
             format!(
                 "{:<47} {:<52} │",
-                light_blue_text(&format!("{}/{}", format_url(&CONFIG.public_host), "info")),
+                &format!("{}/{}", format_url(&CONFIG.domain), "info").light_blue(),
                 format!("Check information about {}", CONFIG.vtuber.name)
             ),
             format!(
                 "{:<47} {:<52} │",
-                light_blue_text(&format!("{}/{}", format_url(&CONFIG.public_host), "upcoming")),
+                &format!("{}/{}", format_url(&CONFIG.domain), "upcoming").light_blue(),
                 "See upcoming streams"
             ),
             format!(
                 "{:<47} {:<52} │",
-                light_blue_text(&format!("{}/{}", format_url(&CONFIG.public_host), "lastseen")),
+                &format!("{}/{}", format_url(&CONFIG.domain), "lastseen").light_blue(),
                 format!("Check when {} was last online", CONFIG.vtuber.name)
             ),
         ];
 
         let commands = [
-            format!("{:<115} │", format_command("curl", &CONFIG.public_host),),
-            format!("{:<115} │", format_command("curl", &format!("{}/info", CONFIG.public_host)),),
-            format!(
-                "{:<115} │",
-                format_command("curl", &format!("{}/upcoming", CONFIG.public_host)),
-            ),
-            format!(
-                "{:<115} │",
-                format_command("curl", &format!("{}/lastseen", CONFIG.public_host)),
-            ),
+            format!("{:<115} │", format_command("curl", &CONFIG.domain),),
+            format!("{:<115} │", format_command("curl", &format!("{}/info", CONFIG.domain)),),
+            format!("{:<115} │", format_command("curl", &format!("{}/upcoming", CONFIG.domain)),),
+            format!("{:<115} │", format_command("curl", &format!("{}/lastseen", CONFIG.domain)),),
         ];
 
         let about_text = [
@@ -106,19 +98,17 @@ impl Render for Page {
             legend.join("\n\t│ "),
             commands.join("\n\t│ "),
             social_media.join("\n\t│ "),
-            light_blue_text(&CONFIG.git_repo),
+            &CONFIG.git_repo.light_blue(),
         ))
     }
 
-    async fn render_html(&self, ctx: PageContext) -> Result<String> {
-        let page = self.render_term(ctx.clone()).await?;
-
-        hydrate_page(&page, &CONFIG.vtuber.name)
+    async fn render_html(&self, _ctx: PageContext) -> Result<String> {
+        compose_page(HTML_STR, &CONFIG.vtuber.name)
     }
 }
 
 fn format_command(command: &str, path: &str) -> String {
-    format!("{} {}", green_text(command), light_blue_text(path))
+    format!("{} {}", command.green(), path.light_blue())
 }
 
 fn format_social(platform: &str, description: &str) -> String {
@@ -128,17 +118,13 @@ fn format_social(platform: &str, description: &str) -> String {
         format!(
             "{:<9} {:<45} │   │ {:<38} │",
             platform,
-            light_blue_text(&format!(
-                "{}/{}",
-                format_url(&CONFIG.public_host),
-                platform.to_lowercase()
-            )),
+            &format!("{}/{}", format_url(&CONFIG.domain), platform.to_lowercase().light_blue()),
             description
         )
     }
 }
 
 fn format_url(host: &str) -> String {
-    let scheme = if CONFIG.public_host == "triggerphi.sh" { "https" } else { "http" };
+    let scheme = if CONFIG.domain == "triggerphi.sh" { "https" } else { "http" };
     format!("{}://{}", scheme, host)
 }

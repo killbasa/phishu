@@ -3,9 +3,9 @@ use std::{collections::HashMap, sync::Mutex};
 use anyhow::Result;
 use once_cell::sync::OnceCell;
 
+mod index;
 mod info;
 mod lastseen;
-mod root;
 mod upcoming;
 
 #[derive(Clone)]
@@ -63,7 +63,7 @@ impl Render for Pages {
         let content = match self {
             Pages::Info => info::Page {}.render_term(ctx).await?,
             Pages::LastSeen => lastseen::Page {}.render_term(ctx).await?,
-            Pages::Root => root::Page {}.render_term(ctx).await?,
+            Pages::Root => index::Page {}.render_term(ctx).await?,
             Pages::Upcoming => upcoming::Page {}.render_term(ctx).await?,
         };
 
@@ -86,7 +86,7 @@ impl Render for Pages {
         let content = match self {
             Pages::Info => info::Page {}.render_html(ctx).await?,
             Pages::LastSeen => lastseen::Page {}.render_html(ctx).await?,
-            Pages::Root => root::Page {}.render_html(ctx).await?,
+            Pages::Root => index::Page {}.render_html(ctx).await?,
             Pages::Upcoming => upcoming::Page {}.render_html(ctx).await?,
         };
 
