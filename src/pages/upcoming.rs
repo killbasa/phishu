@@ -69,10 +69,13 @@ fn format_video(video: &YoutubeVideo, is_terminal: bool) -> String {
 
     let mut entry = match is_terminal {
         true => {
-            format!("{} {}\n ├─       url: {}\n", status, title, url)
+            format!("{} {}\n        ├─       url: {}\n", status, title, url)
         }
         false => {
-            format!("{{{{video:{}}}}}\n{} {}\n ├─       url: {}\n", video.id, status, title, url)
+            format!(
+                "{{{{video:{}}}}}\n{} {}\n        ├─       url: {}\n",
+                video.id, status, title, url
+            )
         }
     };
 
@@ -80,14 +83,14 @@ fn format_video(video: &YoutubeVideo, is_terminal: bool) -> String {
         let (date, diff) = time::humanize(start_time);
 
         entry.push_str(&format!(
-            " └─   started: {}\n",
+            "        └─   started: {}\n",
             &format!("{} UTC ({})", date, diff).light_blue()
         ));
     } else {
         let (date, diff) = time::humanize(&video.scheduled_time);
 
         entry.push_str(&format!(
-            " └─ scheduled: {}\n",
+            "        └─ scheduled: {}\n",
             &format!("{} UTC ({})", date, diff).light_blue()
         ));
     }
