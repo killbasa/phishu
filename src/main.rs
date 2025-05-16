@@ -103,7 +103,7 @@ const FAVICON_STR: &[u8] = include_bytes!("assets/favicon.ico");
 async fn get_favicon() -> impl axum::response::IntoResponse {
     let mut headers = HeaderMap::new();
     headers.insert(CONTENT_TYPE, "image/x-icon".parse().unwrap());
-    headers.insert(CACHE_CONTROL, "immutable,max-age=31536000".parse().unwrap());
+    headers.insert(CACHE_CONTROL, "public,immutable,max-age=31536000".parse().unwrap());
     (StatusCode::OK, headers, FAVICON_STR)
 }
 
@@ -112,7 +112,7 @@ const EMBED_STR: &[u8] = include_bytes!("assets/embed.webp");
 async fn get_embed() -> impl axum::response::IntoResponse {
     let mut headers = HeaderMap::new();
     headers.insert(CONTENT_TYPE, "image/webp".parse().unwrap());
-    headers.insert(CACHE_CONTROL, "immutable,max-age=31536000".parse().unwrap());
+    headers.insert(CACHE_CONTROL, "public,immutable,max-age=31536000".parse().unwrap());
     (StatusCode::OK, headers, EMBED_STR)
 }
 
