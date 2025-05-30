@@ -1,8 +1,8 @@
-# Phishu
+# PHiSHU
 
 A little program for TRiGGERPHiSH 🎮🌊
 
-![Project preview](.github/landing_page.png)
+![Project preview](.github/preview.png)
 
 ## Update intervals
 
