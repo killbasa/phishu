@@ -7,7 +7,7 @@ use super::{YoutubeChannel, utils::ChannelApiResponse};
 
 pub async fn get_channel_api() -> Result<YoutubeChannel> {
     let url = format!(
-        "https://www.googleapis.com/youtube/v3/channels?part=id,snippet,statistics&key={}&id={}",
+        "https://www.googleapis.com/youtube/v3/channels?part=id,snippet,statistics,brandingSettings&key={}&id={}",
         CONFIG.youtube.apikey, CONFIG.vtuber.id
     );
 
@@ -39,6 +39,7 @@ pub async fn get_channel_api() -> Result<YoutubeChannel> {
         subscriber_count: raw_channel.statistics.subscriber_count,
         video_count: raw_channel.statistics.video_count,
         profile_picture: raw_channel.snippet.thumbnails.medium.url,
+        banner: raw_channel.branding_settings.image.banner_external_url,
     };
 
     Ok(channel)

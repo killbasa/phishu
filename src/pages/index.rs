@@ -105,7 +105,7 @@ impl Render for Page {
     }
 
     async fn render_html(&self, _ctx: PageContext) -> Result<String> {
-        compose_page(HTML_STR, &CONFIG.vtuber.name)
+        compose_page(HTML_STR, &CONFIG.server.name)
     }
 }
 

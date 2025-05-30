@@ -66,10 +66,23 @@ pub struct ChannelStatistics {
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct BrandingSettings {
+    pub image: BrandingImage,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct BrandingImage {
+    pub banner_external_url: String,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct RawYoutubeChannel {
     pub id: String,
     pub snippet: ChannelSnippet,
     pub statistics: ChannelStatistics,
+    pub branding_settings: BrandingSettings,
 }
 
 #[derive(Deserialize, Debug)]

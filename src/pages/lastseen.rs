@@ -60,6 +60,6 @@ impl Render for Page {
 
         html = fix_colored_links(&html);
 
-        compose_page(&html, &format!("Last seen | {}", CONFIG.vtuber.name))
+        compose_page(&html, &format!("Last seen | {}", CONFIG.server.name))
     }
 }

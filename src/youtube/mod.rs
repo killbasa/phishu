@@ -15,6 +15,7 @@ pub struct YoutubeChannel {
     pub subscriber_count: String,
     pub video_count: String,
     pub profile_picture: String,
+    pub banner: String,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
