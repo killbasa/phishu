@@ -109,7 +109,7 @@ async fn check_existing_videos() -> Result<()> {
 
             tracing::info!("found {} videos", api_videos.len());
 
-            if db_videos.len() == db_video_ids.len() {
+            if db_videos.len() == api_videos.len() {
                 tracing::info!("upserting {} videos (api)", api_videos.len());
                 for api_video in &api_videos {
                     tracing::debug!("upserting {}", api_video.id);
