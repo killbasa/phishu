@@ -9,7 +9,7 @@ use crate::{
 pub async fn init_scheduler() -> Result<()> {
     let scheduler = JobScheduler::new().await?;
 
-    // run every 15 minutes
+    // run 30 seconds past every 14th, 29th, 44th and 59th minute
     // min quota usage: 96
     scheduler
         .add(Job::new_async("30 14,29,44,59 * * * *", |_, _| {
@@ -19,7 +19,7 @@ pub async fn init_scheduler() -> Result<()> {
         })?)
         .await?;
 
-    // run every 5 minutes (w/ 30 second delay for new videos)
+    // run every 5 minutes
     // min quota usage: 288
     scheduler
         .add(Job::new_async("0 0/5 * * * *", |_, _| {
@@ -72,8 +72,6 @@ async fn check_new_videos() -> Result<()> {
 
             sqlite::upsert_db_videos(api_videos)?;
 
-            pages::refresh_page(pages::Pages::Upcoming).await?;
-
             Ok(())
         }
     }
@@ -102,50 +100,43 @@ async fn check_existing_videos() -> Result<()> {
         Ok(api_videos) => {
             if api_videos.is_empty() {
                 tracing::info!("no videos found (api)");
+
                 sqlite::delete_db_videos(&db_video_ids)?;
-
-                return Ok(());
-            }
-
-            tracing::info!("found {} videos", api_videos.len());
-
-            if db_videos.len() == api_videos.len() {
+            } else if db_videos.len() == api_videos.len() {
                 tracing::info!("upserting {} videos (api)", api_videos.len());
                 for api_video in &api_videos {
                     tracing::debug!("upserting {}", api_video.id);
                 }
 
                 sqlite::upsert_db_videos(api_videos)?;
+            } else {
+                tracing::info!("cleaning up dangling videos");
 
-                return Ok(());
+                let mut api_videos_iter = api_videos.iter();
+                let videos_to_delete: Vec<String> = db_video_ids
+                    .into_iter()
+                    .filter(|video_id| !api_videos_iter.any(|v| &v.id == video_id))
+                    .collect();
+
+                tracing::info!("deleting {} videos (api)", videos_to_delete.len());
+                for video_to_delete in &videos_to_delete {
+                    tracing::debug!("deleting {}", video_to_delete);
+                }
+
+                let mut videos_to_delete_iter = videos_to_delete.iter();
+                let videos_to_update: Vec<YoutubeVideo> = db_videos //
+                    .into_iter()
+                    .filter(|video| !videos_to_delete_iter.any(|v_id| v_id == &video.id))
+                    .collect();
+
+                tracing::info!("upserting {} videos (api)", videos_to_update.len());
+                for video_to_update in &videos_to_update {
+                    tracing::debug!("upserting {}", video_to_update.id);
+                }
+
+                sqlite::upsert_db_videos(videos_to_update)?;
+                sqlite::delete_db_videos(&videos_to_delete)?;
             }
-
-            tracing::info!("cleaning up dangling videos");
-
-            let mut api_videos_iter = api_videos.iter();
-            let videos_to_delete: Vec<String> = db_video_ids
-                .into_iter()
-                .filter(|video_id| !api_videos_iter.any(|v| &v.id == video_id))
-                .collect();
-
-            tracing::info!("deleting {} videos (api)", videos_to_delete.len());
-            for video_to_delete in &videos_to_delete {
-                tracing::debug!("deleting {}", video_to_delete);
-            }
-
-            let mut videos_to_delete_iter = videos_to_delete.iter();
-            let videos_to_update: Vec<YoutubeVideo> = db_videos //
-                .into_iter()
-                .filter(|video| !videos_to_delete_iter.any(|v_id| v_id == &video.id))
-                .collect();
-
-            tracing::info!("upserting {} videos (api)", videos_to_update.len());
-            for video_to_update in &videos_to_update {
-                tracing::debug!("upserting {}", video_to_update.id);
-            }
-
-            sqlite::upsert_db_videos(videos_to_update)?;
-            sqlite::delete_db_videos(&videos_to_delete)?;
 
             pages::refresh_page(pages::Pages::Upcoming).await?;
             pages::refresh_page(pages::Pages::LastSeen).await?;
