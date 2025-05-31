@@ -12,7 +12,7 @@ pub async fn init_scheduler() -> Result<()> {
     // run every 15 minutes
     // min quota usage: 96
     scheduler
-        .add(Job::new_async("0 0/15 * * * *", |_, _| {
+        .add(Job::new_async("30 14,29,44,59 * * * *", |_, _| {
             Box::pin(async {
                 check_new_videos().await.expect("failed to check new videos");
             })
@@ -22,7 +22,7 @@ pub async fn init_scheduler() -> Result<()> {
     // run every 5 minutes (w/ 30 second delay for new videos)
     // min quota usage: 288
     scheduler
-        .add(Job::new_async("30 0/5 * * * *", |_, _| {
+        .add(Job::new_async("0 0/5 * * * *", |_, _| {
             Box::pin(async {
                 check_existing_videos().await.expect("failed to update videos");
             })
@@ -65,7 +65,7 @@ async fn check_new_videos() -> Result<()> {
                 return Ok(());
             }
 
-            tracing::info!("found {} videos", api_videos.len());
+            tracing::info!("found {} videos (xml)", api_videos.len());
             for api_video in &api_videos {
                 tracing::debug!("upserting {}", api_video.id);
             }
@@ -110,6 +110,7 @@ async fn check_existing_videos() -> Result<()> {
             tracing::info!("found {} videos", api_videos.len());
 
             if db_videos.len() == db_video_ids.len() {
+                tracing::info!("upserting {} videos (api)", api_videos.len());
                 for api_video in &api_videos {
                     tracing::debug!("upserting {}", api_video.id);
                 }
@@ -119,12 +120,15 @@ async fn check_existing_videos() -> Result<()> {
                 return Ok(());
             }
 
+            tracing::info!("cleaning up dangling videos");
+
             let mut api_videos_iter = api_videos.iter();
             let videos_to_delete: Vec<String> = db_video_ids
                 .into_iter()
                 .filter(|video_id| api_videos_iter.all(|v| &v.id != video_id))
                 .collect();
 
+            tracing::info!("deleting {} videos (api)", videos_to_delete.len());
             for video_to_delete in &videos_to_delete {
                 tracing::debug!("deleting {}", video_to_delete);
             }
@@ -135,6 +139,7 @@ async fn check_existing_videos() -> Result<()> {
                 .filter(|video| videos_to_delete_iter.all(|v_id| v_id != &video.id))
                 .collect();
 
+            tracing::info!("upserting {} videos (api)", videos_to_update.len());
             for video_to_update in &videos_to_update {
                 tracing::debug!("upserting {}", video_to_update.id);
             }
