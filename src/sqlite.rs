@@ -27,7 +27,7 @@ pub fn init_db() {
     .expect("failed to create table");
 }
 
-pub fn get_db_videos() -> Result<Vec<YoutubeVideo>> {
+pub fn get_db_upcoming_videos() -> Result<Vec<YoutubeVideo>> {
     let conn = DB.lock().expect("failed to lock DB");
 
     let mut stmt = conn.prepare(
@@ -89,6 +89,18 @@ pub fn upsert_db_videos(videos: Vec<YoutubeVideo>) -> Result<()> {
 				VALUES (?1,?2,?3,?4,?5)",
             params![video.id, video.title, video.scheduled_time, video.start_time, video.end_time],
         )?;
+    }
+
+    tx.commit()?;
+    Ok(())
+}
+
+pub fn delete_db_videos(videos: &Vec<String>) -> Result<()> {
+    let mut conn = DB.lock().expect("failed to lock DB");
+    let tx = conn.transaction()?;
+
+    for video_id in videos {
+        tx.execute("DELETE FROM videos WHERE id = ?1", params![video_id])?;
     }
 
     tx.commit()?;

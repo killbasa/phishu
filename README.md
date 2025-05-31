@@ -7,8 +7,8 @@ A little program for TRiGGERPHiSH 🎮🌊
 ## Update intervals
 
 -   `/info` every 6 hours
--   `/upcoming` every 15 minutes
--   `/lastseen` every 15 minutes
+-   `/upcoming` new videos every 15 mins, updates every 5 mins
+-   `/lastseen` every 5 minutes
 
 ## Contributing
 

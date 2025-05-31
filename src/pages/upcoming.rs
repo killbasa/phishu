@@ -16,7 +16,7 @@ pub struct Page {}
 
 impl Render for Page {
     async fn render_term(&self, _ctx: PageContext) -> Result<String> {
-        let videos = sqlite::get_db_videos().unwrap_or_else(|_| {
+        let videos = sqlite::get_db_upcoming_videos().unwrap_or_else(|_| {
             tracing::error!("failed to fetch videos from db");
             Vec::new()
         });
@@ -36,7 +36,7 @@ impl Render for Page {
 
     async fn render_html(&self, _ctx: PageContext) -> Result<String> {
         let title = format!("Upcoming streams | {}", CONFIG.server.name);
-        let videos = sqlite::get_db_videos().unwrap_or_else(|_| {
+        let videos = sqlite::get_db_upcoming_videos().unwrap_or_else(|_| {
             tracing::error!("failed to fetch videos from db");
             Vec::new()
         });

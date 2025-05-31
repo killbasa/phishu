@@ -18,15 +18,10 @@ pub static WEB_USER_AGENT: &str =
 /**
  * Fetches videos from the YouTube API
  */
-pub async fn get_videos_api() -> Result<Vec<YoutubeVideo>> {
-    let video_ids = get_video_ids_xml().await;
-    if let Err(e) = video_ids {
-        return Err(anyhow!("Failed to fetch video IDs: {}", e));
-    }
-
+pub async fn get_videos_api(video_ids: &[String]) -> Result<Vec<YoutubeVideo>> {
     let mut videos = Vec::<YoutubeVideo>::new();
 
-    for chunk in video_ids.unwrap().chunks(50) {
+    for chunk in video_ids.chunks(50) {
         let url = format!(
             "https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&key={}&id={}",
             CONFIG.youtube.apikey,
@@ -55,7 +50,7 @@ pub async fn get_videos_api() -> Result<Vec<YoutubeVideo>> {
     Ok(videos)
 }
 
-async fn get_video_ids_xml() -> Result<Vec<String>> {
+pub async fn get_video_ids_xml() -> Result<Vec<String>> {
     let client = ClientBuilder::new()
         .build()? //
         .get(format!("https://www.youtube.com/feeds/videos.xml?channel_id={}", CONFIG.vtuber.id))
