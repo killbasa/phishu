@@ -125,7 +125,7 @@ async fn check_existing_videos() -> Result<()> {
             let mut api_videos_iter = api_videos.iter();
             let videos_to_delete: Vec<String> = db_video_ids
                 .into_iter()
-                .filter(|video_id| api_videos_iter.all(|v| &v.id != video_id))
+                .filter(|video_id| !api_videos_iter.any(|v| &v.id == video_id))
                 .collect();
 
             tracing::info!("deleting {} videos (api)", videos_to_delete.len());
@@ -136,7 +136,7 @@ async fn check_existing_videos() -> Result<()> {
             let mut videos_to_delete_iter = videos_to_delete.iter();
             let videos_to_update: Vec<YoutubeVideo> = db_videos //
                 .into_iter()
-                .filter(|video| videos_to_delete_iter.all(|v_id| v_id != &video.id))
+                .filter(|video| !videos_to_delete_iter.any(|v_id| v_id == &video.id))
                 .collect();
 
             tracing::info!("upserting {} videos (api)", videos_to_update.len());
