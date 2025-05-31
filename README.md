@@ -29,3 +29,7 @@ just watch
 2. Commit changes
 
 3. Open pull request: <https://github.com/killbasa/phishu/pulls>
+
+## Asset credits
+
+OpenGraph image: <https://x.com/mushroom_bread>
