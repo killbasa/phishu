@@ -25,6 +25,9 @@ pub async fn init_scheduler() -> Result<()> {
         .add(Job::new_async("0 0/5 * * * *", |_, _| {
             Box::pin(async {
                 check_existing_videos().await.expect("failed to update videos");
+
+                pages::refresh_page(pages::Pages::Upcoming).await.unwrap();
+                pages::refresh_page(pages::Pages::LastSeen).await.unwrap();
             })
         })?)
         .await?;
@@ -78,7 +81,7 @@ async fn check_new_videos() -> Result<()> {
 }
 
 async fn check_existing_videos() -> Result<()> {
-    tracing::info!("checking for new videos");
+    tracing::info!("checking for updated videos");
 
     let db_videos = sqlite::get_db_upcoming_videos()?;
 
@@ -137,9 +140,6 @@ async fn check_existing_videos() -> Result<()> {
                 sqlite::upsert_db_videos(videos_to_update)?;
                 sqlite::delete_db_videos(&videos_to_delete)?;
             }
-
-            pages::refresh_page(pages::Pages::Upcoming).await?;
-            pages::refresh_page(pages::Pages::LastSeen).await?;
 
             Ok(())
         }

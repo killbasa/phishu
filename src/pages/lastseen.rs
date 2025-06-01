@@ -3,8 +3,7 @@ use anyhow::Result;
 use crate::{
     colors::Colorize,
     config::CONFIG,
-    sqlite::get_db_most_recent_video,
-    time,
+    sqlite, time,
     utils::{compose_page, fix_colored_links},
 };
 
@@ -18,7 +17,7 @@ pub struct Page {}
 
 impl Render for Page {
     async fn render_term(&self, _ctx: PageContext) -> Result<String> {
-        let video = get_db_most_recent_video()?;
+        let video = sqlite::get_db_most_recent_video()?;
 
         if let Some(video) = video {
             let video_url = &format!("https://youtube.com/watch?v={}", video.id).light_blue();
@@ -38,7 +37,7 @@ impl Render for Page {
     }
 
     async fn render_html(&self, _ctx: PageContext) -> Result<String> {
-        let video = get_db_most_recent_video()?;
+        let video = sqlite::get_db_most_recent_video()?;
 
         let last_seen = match video {
             None => "no recent videos".to_string(),
