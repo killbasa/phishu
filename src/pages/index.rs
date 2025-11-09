@@ -128,5 +128,5 @@ fn format_social(platform: &str, description: &str) -> String {
 
 fn format_url(host: &str) -> String {
     let scheme = if CONFIG.domain == "triggerphi.sh" { "https" } else { "http" };
-    format!("{}://{}", scheme, host)
+    format!("{scheme}://{host}")
 }

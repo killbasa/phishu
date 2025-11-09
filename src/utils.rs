@@ -14,9 +14,9 @@ pub fn fix_colored_links(html: &str) -> String {
             let link = caps.get(2).unwrap().as_str();
 
             if link.contains(&CONFIG.domain) {
-                format!(r#"<a href="{1}" {0}>{1}</a>"#, color, link)
+                format!(r#"<a href="{link}" {color}>{link}</a>"#)
             } else {
-                format!(r#"<a href="{1}" target="_blank" {0}>{1}</a>"#, color, link)
+                format!(r#"<a href="{link}" target="_blank" {color}>{link}</a>"#)
             }
         })
         .to_string()

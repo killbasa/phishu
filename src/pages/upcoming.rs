@@ -71,16 +71,16 @@ fn format_video(video: &YoutubeVideo) -> String {
     let title = &video.title.green();
     let url = &format!("https://www.youtube.com/watch?v={}", video.id).light_blue();
 
-    let mut entry = format!("{} {}\nurl:       {}\n", status, title, url);
+    let mut entry = format!("{status} {title}\nurl:       {url}\n");
 
     if let Some(start_time) = &video.start_time {
         let (date, diff) = time::humanize(start_time);
 
-        entry.push_str(&format!("started:   {}\n", &format!("{} UTC ({})", date, diff)));
+        entry.push_str(&format!("started:   {}\n", &format!("{date} UTC ({diff})")));
     } else {
         let (date, diff) = time::humanize(&video.scheduled_time);
 
-        entry.push_str(&format!("scheduled: {}\n", &format!("{} UTC ({})", date, diff)));
+        entry.push_str(&format!("scheduled: {}\n", &format!("{date} UTC ({diff})")));
     }
 
     entry
@@ -98,10 +98,10 @@ fn format_video_html(video: &YoutubeVideo) -> String {
 
     let time_str = if let Some(start_time) = &video.start_time {
         let (date, diff) = time::humanize(start_time);
-        format!("<td>started:</td><td>{}</td>", &format!("{} UTC ({})", date, diff))
+        format!("<td>started:</td><td>{}</td>", &format!("{date} UTC ({diff})"))
     } else {
         let (date, diff) = time::humanize(&video.scheduled_time);
-        format!("<td>scheduled:</td><td>{}</td>", &format!("{} UTC ({})", date, diff))
+        format!("<td>scheduled:</td><td>{}</td>", &format!("{date} UTC ({diff})"))
     };
 
     format!(

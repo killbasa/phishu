@@ -15,10 +15,10 @@ pub fn humanize(time: &str) -> (String, String) {
         .iter()
         .map(|period| -> String {
             match period {
-                TimePeriod::Minutes(n) => format!("{}m", n),
-                TimePeriod::Hours(n) => format!("{}h", n),
-                TimePeriod::Days(n) => format!("{}d", n),
-                TimePeriod::Weeks(n) => format!("{}w", n),
+                TimePeriod::Minutes(n) => format!("{n}m"),
+                TimePeriod::Hours(n) => format!("{n}h"),
+                TimePeriod::Days(n) => format!("{n}d"),
+                TimePeriod::Weeks(n) => format!("{n}w"),
             }
         })
         .collect::<Vec<_>>()
@@ -33,8 +33,8 @@ pub fn humanize(time: &str) -> (String, String) {
 
     let humanized = match delta.cmp(&TimeDelta::zero()) {
         Ordering::Equal => "now".into(),
-        Ordering::Greater => format!("in {}", text),
-        Ordering::Less => format!("{} ago", text),
+        Ordering::Greater => format!("in {text}"),
+        Ordering::Less => format!("{text} ago"),
     };
 
     (

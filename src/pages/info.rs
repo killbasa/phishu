@@ -78,8 +78,7 @@ impl Render for Page {
         );
 
         Ok(format!(
-            "Channel\n{}\n\nInformation\n{}\n\nHashtags\n{}\n\nReferences\n{}",
-            channel_section, information_section, hashtags_section, references_section
+            "Channel\n{channel_section}\n\nInformation\n{information_section}\n\nHashtags\n{hashtags_section}\n\nReferences\n{references_section}"
         ))
     }
 

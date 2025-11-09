@@ -51,11 +51,11 @@ pub async fn refresh_page(page: Pages) -> Result<()> {
 
 impl Render for Pages {
     async fn render_term(&self, ctx: PageContext) -> Result<String> {
-        if let Some(term) = TERM_CACHE.get() {
-            if let Some(content) = term.lock().unwrap().get(self) {
-                tracing::debug!("cache hit for {:?} term", self);
-                return Ok(content.clone());
-            }
+        if let Some(term) = TERM_CACHE.get()
+            && let Some(content) = term.lock().unwrap().get(self)
+        {
+            tracing::debug!("cache hit for {:?} term", self);
+            return Ok(content.clone());
         }
 
         tracing::debug!("cache miss for {:?} term", self);
@@ -74,11 +74,11 @@ impl Render for Pages {
     }
 
     async fn render_html(&self, ctx: PageContext) -> Result<String> {
-        if let Some(term) = HTML_CACHE.get() {
-            if let Some(content) = term.lock().unwrap().get(self) {
-                tracing::debug!("cache hit for {:?} html", self);
-                return Ok(content.clone());
-            }
+        if let Some(term) = HTML_CACHE.get()
+            && let Some(content) = term.lock().unwrap().get(self)
+        {
+            tracing::debug!("cache hit for {:?} html", self);
+            return Ok(content.clone());
         }
 
         tracing::debug!("cache miss for {:?} html", self);
