@@ -69,9 +69,8 @@ impl Render for Page {
             ("Discord", 2),
             ("Twitch", 3),
             ("TikTok", 4),
-            ("Reddit", 5),
-            ("Website", 6),
-            ("Store", 7),
+            ("Website", 5),
+            ("Store", 6),
         ]
         .iter()
         .map(|(platform, i)| format_social(platform, about_text[*i]))
