@@ -27,9 +27,6 @@ use dotenv::dotenv;
 use pages::{PageContext, Pages, Render};
 use reqwest::header::{CACHE_CONTROL, CONTENT_SECURITY_POLICY};
 
-#[derive(Clone)]
-struct AppState {}
-
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv().ok();
@@ -37,8 +34,6 @@ async fn main() -> Result<()> {
 
     sqlite::init_db();
     scheduler::init_scheduler().await.expect("failed to init scheduler");
-
-    let state = AppState {};
 
     let router = Router::new() //
         .fallback(Redirect::temporary("/"))
@@ -54,13 +49,11 @@ async fn main() -> Result<()> {
         .route("/discord", get(Redirect::permanent(&CONFIG.vtuber.socials.discord)))
         .route("/twitch", get(Redirect::permanent(&CONFIG.vtuber.socials.twitch)))
         .route("/tiktok", get(Redirect::permanent(&CONFIG.vtuber.socials.tiktok)))
-        .route("/reddit", get(Redirect::permanent(&CONFIG.vtuber.socials.reddit)))
         .route("/website", get(Redirect::temporary(&CONFIG.vtuber.socials.website)))
         .route("/store", get(Redirect::temporary(&CONFIG.vtuber.socials.store)))
         // Assets
         .route("/favicon.ico", get(get_favicon))
-        .route("/embed.webp", get(get_embed))
-        .with_state(state);
+        .route("/embed.webp", get(get_embed));
 
     let host = Ipv4Addr::from_str(&CONFIG.server.host).expect("invalid host");
     let socket = SocketAddr::from((host, CONFIG.server.port));

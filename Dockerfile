@@ -1,4 +1,4 @@
-FROM rust:1.91.0-slim-bookworm AS builder
+FROM rust:1.91.1-slim-bookworm AS builder
 
 WORKDIR /temp
 
@@ -26,5 +26,6 @@ ENV HOST=0.0.0.0
 COPY --from=builder /temp/target/release/phishu /etc/phishu/app
 
 EXPOSE 3000
+VOLUME [ "/etc/phishu/data" ]
 
 ENTRYPOINT [ "/etc/phishu/app" ]

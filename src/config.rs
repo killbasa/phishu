@@ -18,7 +18,6 @@ pub struct VtuberSocialsConfig {
     pub discord: String,
     pub twitch: String,
     pub tiktok: String,
-    pub reddit: String,
     pub website: String,
     pub store: String,
 }
@@ -63,12 +62,11 @@ impl Config {
                 channel_url: "https://www.youtube.com/@TRiGGERPHiSH".to_string(),
                 socials: VtuberSocialsConfig {
                     twitter: "https://twitter.com/TRiGGERPH1SH".to_string(),
-                    discord: "https://discord.com/invite/4GHZZMm4Sp".to_string(),
+                    discord: "https://discord.com/invite/aegislink".to_string(),
                     twitch: "https://www.twitch.tv/triggerph1sh".to_string(),
                     tiktok: "https://www.tiktok.com/@triggerphish_al".to_string(),
-                    reddit: "https://www.reddit.com/user/TriggerPh1sh/".to_string(),
                     website: "https://aegis-l.ink/talent/triggerphish".to_string(),
-                    store: "https://merch.kawaentertainment.com/en-ca/collections/trigg3rph-h"
+                    store: "https://merch.kawaentertainment.com/en-ca/collections/triggerphish"
                         .to_string(),
                 },
             },
