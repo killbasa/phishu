@@ -1,4 +1,5 @@
 use anyhow::Result;
+use askama::Template;
 use once_cell::sync::Lazy;
 
 use crate::config::CONFIG;
@@ -22,15 +23,18 @@ pub fn fix_colored_links(html: &str) -> String {
         .to_string()
 }
 
-const ROOT_HTML_STR: &str = include_str!("assets/root.html");
+#[derive(Template)]
+#[template(path = "root.html", escape = "none")]
+struct RootTemplate<'a> {
+    title: &'a str,
+    main: &'a str,
+}
 
 pub fn compose_page(html: &str, title: &str) -> Result<String> {
-    let mut root = ROOT_HTML_STR.replace("{{main}}", html);
+    let root = RootTemplate {
+        title, //
+        main: html,
+    };
 
-    root = root.replace("{{domain}}", &CONFIG.domain);
-
-    let scheme = if CONFIG.domain == "triggerphi.sh" { "https" } else { "http" };
-    root = root.replace("{{scheme}}", scheme);
-
-    Ok(root.replace("{{title}}", title))
+    Ok(root.render()?)
 }

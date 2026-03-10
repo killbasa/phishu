@@ -1,4 +1,5 @@
 use anyhow::Result;
+use askama::Template;
 
 use crate::{
     colors::Colorize,
@@ -9,7 +10,11 @@ use crate::{
 
 use super::{PageContext, Render};
 
-const HTML_STR: &str = include_str!("lastseen.html");
+#[derive(Template)]
+#[template(path = "lastseen.html", escape = "none")]
+struct LastseenTemplate<'a> {
+    last_seen: &'a str,
+}
 
 pub struct Page {}
 
@@ -55,10 +60,9 @@ impl Render for Page {
             }
         };
 
-        let mut html = HTML_STR.replace("{{last_seen}}", &last_seen);
+        let html = LastseenTemplate { last_seen: &last_seen };
+        let html_fixed = fix_colored_links(&html.render().unwrap());
 
-        html = fix_colored_links(&html);
-
-        compose_page(&html, &format!("Last seen | {}", CONFIG.server.name))
+        compose_page(&html_fixed, &format!("Last seen | {}", CONFIG.server.name))
     }
 }

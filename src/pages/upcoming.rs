@@ -1,4 +1,5 @@
 use anyhow::Result;
+use askama::Template;
 
 use crate::{
     colors::Colorize,
@@ -10,7 +11,11 @@ use crate::{
 
 use super::{PageContext, Render};
 
-const HTML_STR: &str = include_str!("upcoming.html");
+#[derive(Template)]
+#[template(path = "upcoming.html", escape = "none")]
+struct UpcomingTemplate<'a> {
+    video_list: &'a str,
+}
 
 pub struct Page {}
 
@@ -42,8 +47,8 @@ impl Render for Page {
         });
 
         if videos.is_empty() {
-            let html = HTML_STR.replace("{{video_list}}", "no upcoming streams");
-            return compose_page(&html, &title);
+            let html = UpcomingTemplate { video_list: "no upcoming streams" };
+            return compose_page(&html.render().unwrap(), &title);
         }
 
         let mut video_list = Vec::<String>::new();
@@ -52,10 +57,10 @@ impl Render for Page {
             video_list.push(format_video_html(&video));
         }
 
-        let mut html = HTML_STR.replace("{{video_list}}", &video_list.join(""));
-        html = fix_colored_links(&html);
+        let html = UpcomingTemplate { video_list: &video_list.join("") };
+        let html_fixed = fix_colored_links(&html.render().unwrap());
 
-        compose_page(&html, &title)
+        compose_page(&html_fixed, &title)
     }
 }
 

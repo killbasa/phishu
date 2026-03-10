@@ -1,4 +1,5 @@
 use anyhow::Result;
+use askama::Template;
 
 use crate::{colors::Colorize, config::CONFIG, utils::compose_page};
 
@@ -12,7 +13,12 @@ const ROOT_LOGO: &str = r#"
 	   ██║   ██║  ██║██║╚██████╔╝╚██████╔╝███████╗██║  ██║██║     ██║  ██║██║███████║██║  ██║
 	   ╚═╝   ╚═╝  ╚═╝╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝"#;
 
-const HTML_STR: &str = include_str!("index.html");
+#[derive(Template)]
+#[template(path = "index.html", escape = "none")]
+struct IndexTemplate<'a> {
+    scheme: &'a str,
+    domain: &'a str,
+}
 
 pub struct Page {}
 
@@ -71,6 +77,7 @@ impl Render for Page {
             ("TikTok", 4),
             ("Website", 5),
             ("Store", 6),
+            ("", 7),
         ]
         .iter()
         .map(|(platform, i)| format_social(platform, about_text[*i]))
@@ -104,7 +111,12 @@ impl Render for Page {
     }
 
     async fn render_html(&self, _ctx: PageContext) -> Result<String> {
-        compose_page(HTML_STR, &CONFIG.server.name)
+        let html = IndexTemplate {
+            scheme: if CONFIG.domain == "triggerphi.sh" { "https" } else { "http" },
+            domain: &CONFIG.domain,
+        };
+
+        compose_page(&html.render().unwrap(), &CONFIG.server.name)
     }
 }
 
@@ -119,7 +131,7 @@ fn format_social(platform: &str, description: &str) -> String {
         format!(
             "{:<9} {:<45} │   │ {:<38} │",
             platform,
-            &format!("{}/{}", format_url(&CONFIG.domain), platform.to_lowercase().light_blue()),
+            &format!("{}/{}", format_url(&CONFIG.domain), platform.to_lowercase()).light_blue(),
             description
         )
     }
