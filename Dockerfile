@@ -7,6 +7,7 @@ RUN apt-get update && \
 	rm -rf /var/lib/apt/lists/*
 
 COPY ./src ./src/
+COPY ./templates ./templates/
 COPY ./Cargo.toml ./Cargo.lock ./
 
 RUN cargo build --locked --release
