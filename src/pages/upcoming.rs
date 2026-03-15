@@ -114,7 +114,7 @@ fn format_video_html(video: &YoutubeVideo) -> String {
 			<div class="video-entry">
 				<img src="https://i.ytimg.com/vi_webp/{}/maxresdefault.webp" />
 				<div class="flex-col">
-					<span>{}{}</span>
+					<span>{} {}</span>
 					<table>
 						<colgroup>
 							<col style="width: 1px">
