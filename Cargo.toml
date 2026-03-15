@@ -19,7 +19,6 @@ debug    = true
 inherits = "release"
 
 [dependencies]
-ansi-to-html         = "0.2.2"
 anyhow               = "1.0.98"
 askama               = "0.14.0"
 axum                 = "0.8.4"
