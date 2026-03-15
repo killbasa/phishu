@@ -6,17 +6,17 @@ A little program for TRiGGERPHiSH 🎮🌊
 
 ## Update intervals
 
--   `/info` every 6 hours
--   `/upcoming` new videos every 15 mins, updates every 5 mins
--   `/lastseen` every 5 minutes
+- `/info` every 6 hours
+- `/upcoming` new videos every 15 mins, updates every 5 mins
+- `/lastseen` every 5 minutes
 
 ## Contributing
 
 ### Tools
 
--   [Rust](https://www.rust-lang.org/)
--   [just](https://github.com/casey/just)
--   [cargo watch](https://github.com/watchexec/cargo-watch)
+- [Rust](https://www.rust-lang.org/)
+- [just](https://github.com/casey/just)
+- [cargo watch](https://github.com/watchexec/cargo-watch)
 
 ### Steps
 
